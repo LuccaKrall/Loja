@@ -1,46 +1,2434 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Site com Carrossel</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="javascript.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brilho Elegante - Moda e Acessórios</title>
+    <style>
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination-btn {
+            padding: 10px 20px;
+            background-color: var(--roupas-primaria);
+            color: var(--cor-clara);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination-btn:disabled {
+            background-color: var(--cor-sombra);
+            cursor: not-allowed;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: var(--roupas-destaque);
+        }
+
+        .page-info {
+            font-size: 16px;
+            color: var(--cor-texto);
+        }
+
+        .products {
+            display: none;
+        }
+
+        .products.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        :root {
+            /* Cores base */
+            --cor-clara: #FFFFFF;
+            --cor-texto: #333333;
+            --cor-texto-claro: #666666;
+            
+            /* Cores para Semi Joias */
+            --semi-joias-primaria: #D4AF37; /* Dourado */
+            --semi-joias-secundaria: #F5E6C8; /* Dourado claro */
+            --semi-joias-destaque: #A67C52; /* Bronze */
+            --semi-joias-fundo: #FFF9E6; /* Fundo amarelado claro */
+            
+            /* Cores para Roupas */
+            --roupas-primaria: #FD79A8; /* Rosa */
+            --roupas-secundaria: #FFD6E7; /* Rosa claro */
+            --roupas-destaque: #E84393; /* Rosa mais forte */
+            --roupas-fundo: #f7f7f7; /* Fundo rosado claro */
+            
+            /* Cores para Tecnologia */
+            --tech-primaria: #0984E3; /* Azul */
+            --tech-secundaria: #D0EBFF; /* Azul claro */
+            --tech-destaque: #074B83; /* Azul escuro */
+            --tech-fundo: #F0F8FF; /* Fundo azulado claro */
+            
+            /* Cores gerais */
+            --cor-sombra: rgba(0, 0, 0, 0.1);
+            --cor-sombra-forte: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        body {
+            color: var(--cor-texto);
+            background-color: var(--semi-joias-fundo); /* Default */
+        }
+
+        /* Estilos específicos para cada página */
+        body[data-page="home"] {
+            background-color: var(--semi-joias-fundo);
+        }
+
+        body[data-page="semi-joias"] {
+            background-color: var(--semi-joias-fundo);
+        }
+
+        body[data-page="roupas"] {
+            background-color: var(--roupas-fundo);
+        }
+
+        body[data-page="tecnologia"] {
+            background-color: var(--tech-fundo);
+        }
+
+        body[data-page="contato"] {
+            background-color: var(--semi-joias-fundo);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--semi-joias-primaria), var(--semi-joias-secundaria));
+            padding: 20px 0;
+            box-shadow: 0 2px 10px var(--cor-sombra);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--cor-clara);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            color: var(--semi-joias-primaria);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .menu li {
+            margin-left: 30px;
+        }
+
+        .menu a {
+            color: var(--cor-clara);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .menu a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background-image: url('https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--cor-clara);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Botões temáticos */
+        .btn-semi-joias {
+            background-color: var(--semi-joias-primaria);
+            color: var(--cor-clara);
+        }
+
+        .btn-semi-joias:hover {
+            background-color: var(--semi-joias-destaque);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px var(--cor-sombra);
+        }
+
+        .btn-roupas {
+            background-color: var(--roupas-primaria);
+            color: var(--cor-clara);
+        }
+
+        .btn-roupas:hover {
+            background-color: var(--roupas-destaque);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px var(--cor-sombra);
+        }
+
+        .btn-tech {
+            background-color: var(--tech-primaria);
+            color: var(--cor-clara);
+        }
+
+        .btn-tech:hover {
+            background-color: var(--tech-destaque);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px var(--cor-sombra);
+        }
+
+        /* Section Titles */
+        .section-title {
+            text-align: center;
+            margin: 60px 0 40px;
+            font-size: 36px;
+            position: relative;
+        }
+
+        /* Títulos temáticos */
+        .title-semi-joias {
+            color: var(--semi-joias-primaria);
+        }
+
+        .title-roupas {
+            color: var(--roupas-primaria);
+        }
+
+        .title-tech {
+            color: var(--tech-primaria);
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            margin: 15px auto 0;
+        }
+
+        .title-semi-joias::after {
+            background-color: var(--semi-joias-secundaria);
+        }
+
+        .title-roupas::after {
+            background-color: var(--roupas-secundaria);
+        }
+
+        .title-tech::after {
+            background-color: var(--tech-secundaria);
+        }
+
+        /* Filtros */
+        .category-filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .category-btn {
+            padding: 10px 25px;
+            background-color: var(--cor-clara);
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        /* Filtros para Semi Joias */
+        .filters-semi-joias .category-btn:hover, 
+        .filters-semi-joias .category-btn.active {
+            background-color: var(--semi-joias-primaria);
+            color: var(--cor-clara);
+            border-color: var(--semi-joias-primaria);
+        }
+
+        /* Filtros para Roupas */
+        .filters-roupas .category-btn:hover, 
+        .filters-roupas .category-btn.active {
+            background-color: var(--roupas-primaria);
+            color: var(--cor-clara);
+            border-color: var(--roupas-primaria);
+        }
+
+        /* Filtros específicos para gênero */
+        .clothing-filters .category-btn[data-category="mulher"]:hover, 
+        .clothing-filters .category-btn[data-category="mulher"].active {
+            background-color: var(--roupas-primaria);
+            border-color: var(--roupas-primaria);
+        }
+
+        .clothing-filters .category-btn[data-category="homem"]:hover, 
+        .clothing-filters .category-btn[data-category="homem"].active {
+            background-color: var(--tech-primaria);
+            border-color: var(--tech-primaria);
+        }
+
+        .clothing-filters .category-btn[data-category="crianca"]:hover, 
+        .clothing-filters .category-btn[data-category="crianca"].active {
+            background-color: #00B894;
+            border-color: #00B894;
+        }
+
+        /* Produtos */
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .product-card {
+            background-color: var(--cor-clara);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--cor-sombra);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px var(--cor-sombra-forte);
+        }
+
+        .product-image {
+            height: 400px; /* Aumentei de 250px para 300px */
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .product-badge.mulher {
+            background-color: var(--roupas-primaria);
+        }
+
+        .product-badge.homem {
+            background-color: var(--tech-primaria);
+        }
+
+        .product-badge.crianca {
+            background-color: #00B894;
+        }
+
+        .product-badge.semi-joias {
+            background-color: var(--semi-joias-primaria);
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--cor-texto);
+        }
+
+        .product-price {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .price-semi-joias {
+            color: var(--semi-joias-primaria);
+        }
+
+        .price-roupas {
+            color: var(--roupas-primaria);
+        }
+
+        .price-tech {
+            color: var(--tech-primaria);
+        }
+
+        .product-old-price {
+            font-size: 16px;
+            color: var(--cor-texto-claro);
+            text-decoration: line-through;
+            margin-right: 10px;
+        }
+
+        .product-description {
+            font-size: 14px;
+            color: var(--cor-texto-claro);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--cor-texto);
+        }
+
+        .btn-outline-semi-joias {
+            border: 1px solid var(--semi-joias-primaria);
+            color: var(--semi-joias-primaria);
+        }
+
+        .btn-outline-semi-joias:hover {
+            background-color: var(--semi-joias-primaria);
+            color: white;
+        }
+
+        .btn-outline-roupas {
+            border: 1px solid var(--roupas-primaria);
+            color: var(--roupas-primaria);
+        }
+
+        .btn-outline-roupas:hover {
+            background-color: var(--roupas-primaria);
+            color: white;
+        }
+
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 40px;
+            color: var(--cor-texto-claro);
+            font-size: 18px;
+        }
+
+        /* Páginas */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Hero Roupas */
+        .hero-roupas {
+            background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .hero-roupas::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-roupas-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero-roupas h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Hero Tecnologia */
+        .hero-tech {
+            background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .hero-tech::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-tech-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #222;
+            color: var(--cor-clara);
+            padding: 60px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--semi-joias-primaria);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--semi-joias-primaria);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 50%;
+            color: var(--cor-clara);
+            text-align: center;
+            line-height: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--semi-joias-primaria);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* Cards de Contato */
+        .contact-card {
+            background-color: var(--cor-clara);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--cor-sombra);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--cor-sombra-forte);
+        }
+
+        .contact-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .icon-semi-joias {
+            color: var(--semi-joias-primaria);
+        }
+
+        .icon-roupas {
+            color: var(--roupas-primaria);
+        }
+
+        .icon-tech {
+            color: var(--tech-primaria);
+        }
+
+        .contact-card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--cor-texto);
+        }
+
+        .contact-card p, .contact-card a {
+            color: var(--cor-texto-claro);
+            text-decoration: none;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .contact-card a:hover {
+            color: var(--semi-joias-primaria);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .menu {
+                display: none;
+            }
+            
+            .hero h1, .hero-roupas h1, .hero-tech h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .section-title {
+                font-size: 30px;
+            }
+            
+            .category-filters, .clothing-filters {
+                gap: 8px;
+            }
+            
+            .category-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
-  <h1 style="text-align: center; padding-top: 50px;text-shadow: 2px,2px,10px;">Bem Vindo a nossa loja</h1>
-    <!-- Cabeçalho -->
-  <header>
-    <div class="header-content" >
-      <a style="text-align: center;" href="joias.html">Joias</a>
-      <a style="text-align: center;"href="roupas.html">Roupas</a>
-      <a style="text-align: center;"href="tecnologia.html">Tecnologia</a>
+<body data-page="home">
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Brilho<span>Elegante</span></div>
+                <ul class="menu">
+                    <li><a href="#" data-page="tecnologia">Tecnologia</a></li>
+                    <li><a href="#" data-page="roupas">Roupas</a></li>
+                    <li><a href="#" data-page="semi-joias" class="active">Semi Joias</a></li>
+                    <li><a href="#" data-page="contato">Contato</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-      
-      <!-- Tecnologia com o menu dropdown -->
-      <span class="dropdown">
-        Contatos
-        <ul class="dropdown-menu">
-          <li><a href="#">Whats</a></li>
-          <li><a href="#">Instagram</a></li>
-          <li><a href="#">Email</a></li>
-        </ul>
-      </span>
-    </div>
-  </header>
+    <!-- Página Inicial -->
+    <section id="home" class="page active">
+        <div class="hero">
+            <div class="hero-content">
+                <h1>Semi Joias que Transformam seu Estilo</h1>
+                <p>Descubra nossa coleção exclusiva de peças que combinam elegância e sofisticação</p>
+                <a href="#" data-page="semi-joias" class="btn btn-semi-joias">Ver Catálogo Completo</a>
+            </div>
+        </div>
 
-  <!-- Carrossel -->
-  <div class="carousel-container">
-    <div class="carousel">
-      <img src="ImagemTecnologia/goProatt.jpg" alt="Imagem 1">
-      <img src="ImagemTecnologia/goPro.jpg" alt="Imagem 2">
-      <img src="ImagemTecnologia/Robo.jpg" alt="Imagem 3">
-    </div>
-    <!-- Setas de navegação -->
-    <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
-    <button class="next" onclick="moveSlide(1)">&#10095;</button>
-  </div>
+        <div class="container">
+            <h2 class="section-title title-semi-joias">Destaques da Coleção</h2>
+            <div class="products">
+                <div class="product-card" data-category="colares">
+                    <div class="product-badge semi-joias">Novo</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Colar/ColarPrataVerde.png" alt="Colar Dourado">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Colar Prata</h3>
+                        <p class="product-price price-semi-joias">R$ 64,80</p>
+                        <p class="product-description">Colar prata com pedra verde.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
 
-  <script src="script.js"></script>
+                <div class="product-card" data-category="brincos">
+                    <div class="product-badge semi-joias">Promoção</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/berloque/berlok.jpg" alt="Brincos Prateados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pingente prata com verde</h3>
+                        <p class="product-price price-semi-joias">R$ 70,20</p>
+                        <p class="product-description">Pingente prata com pedra verde para berloques</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="pagination">
+                <button class="pagination-btn prev" disabled>Anterior</button>
+                <span class="page-info">Página <span class="current-page">1</span> de <span class="total-pages">5</span></span>
+                <button class="pagination-btn next">Próximo</button>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Página de Semi Joias -->
+    <section id="semi-joias" class="page">
+        <div class="container">
+            <h2 class="section-title title-semi-joias">Catálogo de Semi Joias</h2>
+            
+            <div class="category-filters filters-semi-joias">
+                <button class="category-btn active" data-category="todos">Todos</button>
+                <button class="category-btn" data-category="colares">Colares</button>
+                <button class="category-btn" data-category="brincos">Brincos</button>
+                <button class="category-btn" data-category="aneis">Anéis</button>
+                <button class="category-btn" data-category="pulseiras">Pulseiras</button>
+                <button class="category-btn" data-category="berloques">Berloques</button>
+                <button class="category-btn" data-category="conjuntos">Conjuntos</button>
+            </div>
+            
+            <div class="products">
+                <!-- Colares -->
+                <div class="product-card" data-category="colares">
+                    <div class="product-badge semi-joias">Novo</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Colar/ColarFlorVerde.png" alt="Colar Dourado">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Colar Prata </h3>
+                        <p class="product-price price-semi-joias">R$ 81,80</p>
+                        <p class="product-description">Colar prata com Flor Esmeralda</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="colares">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Colar/ColarOurtoCoracao.png" alt="Colar Prateado">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Colar dourado  coração</h3>
+                        <p class="product-price price-semi-joias">R$ 70,20</p>
+                        <p class="product-description">Colar banhado a ouro com um pingente de coração.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card" data-category="colares">
+                    <div class="product-badge semi-joias">Novo</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Colar/ColarPrataVerde.png" alt="Colar Dourado">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Colar Esmeralda </h3>
+                        <p class="product-price price-semi-joias">R$ 64,80</p>
+                        <p class="product-description">Colar.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>                <div class="product-card" data-category="colares">
+                    <div class="product-badge semi-joias">Novo</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Colar/Corrente.png" alt="Colar Dourado">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Colar </h3>
+                        <p class="product-price price-semi-joias">R$ 70,20</p>
+                        <p class="product-description">Colar.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>               
+                <div class="product-card" data-category="colares">
+                    <div class="product-badge semi-joias">Novo</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/colar/DiamanteRoxo75,60.jpg" alt="Colar Dourado">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Colar </h3>
+                        <p class="product-price price-semi-joias">R$ 75,60</p>
+                        <p class="product-description">Colar.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>                                         
+    
+                
+                <!-- Brincos -->
+                <div class="product-card" data-category="brincos">
+                    <div class="product-badge semi-joias">Promoção</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Brincos/Brinco vermelho.png" alt="Brincos Prateados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Brinco Ruby</h3>
+                        <p class="product-price price-semi-joias">R$ 81,00</p>
+                        <p class="product-description">Brincos eu dourado banhado a ouro com pedra <ruby></ruby></p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="brincos">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Brincos/brincoJoias.png" alt="Brincos Dourados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Brincos Dourados Joias</h3>
+                        <p class="product-price price-semi-joias">R$70,20</p>
+                        <p class="product-description">Brincos banhados a ouro com detalhes em Joias.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="brincos">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/Brincos/BrincoAzul.jpg" alt="Brincos Dourados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Brincos Dourados Joias</h3>
+                        <p class="product-price price-semi-joias">R$ 70,20</p>
+                        <p class="product-description">Brincos banhados a ouro com detalhes em Joias.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Anéis -->
+
+                
+                <div class="product-card" data-category="aneis">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/aneis/anelOuro.png" alt="Anel Zirconia">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Anel Banhado a ouro</h3>
+                        <p class="product-price price-semi-joias">R$ 70,20</p>
+                        <p class="product-description">Anel  ouro com coracao.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card" data-category="aneis">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/aneis/anel6.jpg" alt="Anel Zirconia">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Aneis Diversos</h3>
+                        <p class="product-price price-semi-joias">R$ 42,90</p>
+                        <p class="product-description">Diversos aneis apartir de 42,90</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pulseiras -->
+                <div class="product-card" data-category="pulseiras">
+                    <div class="product-image">
+                        <img src="ImagemJoias/pulseiras/20250323_175451(1).jpg" alt="Pulseira Dupla">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pulseiras Diversas a partir de:</h3>
+                        <p class="product-price price-semi-joias">R$ 37,70</p>
+                        <p class="product-description">Conjunto de duas pulseiras em ouro rose e prata.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+
+                
+                <!-- Berloques -->
+                <div class="product-card" data-category="berloques">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/berloque/berlok.jpg" alt="Berloque Coração">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pigente </h3>
+                        <p class="product-price price-semi-joias">R$ 70,20</p>
+                        <p class="product-description">Pigente com pedra esmeralda.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="berloques">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/berloque/pedraAzul.png" alt="Berloque Letra">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Berloque</h3>
+                        <p class="product-price price-semi-joias">R$ 37,80</p>
+                        <p class="product-description">Berloque com pedra azulada.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card" data-category="berloques">
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/berloque/todos.png "alt="Berloque Letra">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Berloque </h3>
+                        <p class="product-price price-semi-joias">R$ 100,00</p>
+                        <p class="product-description">Berloque todos os pingentes.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conjuntos -->
+                <div class="product-card" data-category="conjuntos">
+                    <div class="product-badge semi-joias">Promoção</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/IAS/ChatGPT Image 8 de abr. de 2025, 13_37_08.png" alt="Conjunto Dourado">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto Dourado Complete</h3>
+                        <p class="product-price price-semi-joias">
+                            <span class="product-old-price">R$ 399,90</span>
+                            R$ 299,90
+                        </p>
+                        <p class="product-description">Conjunto com colar, pulseira e brincos banhados a ouro.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination">
+                <button class="pagination-btn prev" disabled>Anterior</button>
+                <span class="page-info">Página <span class="current-page">1</span> de <span class="total-pages">5</span></span>
+                <button class="pagination-btn next">Próximo</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Página de Roupas -->
+    <section id="roupas" class="page">
+        <div class="hero-roupas">
+            <div class="hero-roupas-content">
+                <h1>Moda para Todos os Estilos</h1>
+                <p>Descubra looks incríveis que combinam com sua personalidade</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2 class="section-title title-roupas">Nossa Coleção de Roupas</h2>
+            
+            <div class="category-filters clothing-filters">
+                <button class="category-btn active" data-category="todos">Todos</button>
+                <button class="category-btn" data-category="mulher">Feminino</button>
+                <button class="category-btn" data-category="homem">Masculino</button>
+                <button class="category-btn" data-category="crianca">Infantil</button>
+            </div>
+            
+            <!-- Página 1 -->
+            <div class="products page-1 active">
+                <!-- Roupas Femininas -->
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/17,99 .jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 35,99</span>
+                            R$ 17,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/18,00.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 27,99</span>
+                            R$ 17,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/18,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 30,00</span>
+                            R$ 18,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/21,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 30,00</span>
+                            R$ 21,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/22,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 32,99</span>
+                            R$ 22,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/23,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 33,99</span>
+                            R$ 23,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinha 19,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 29,99</span>
+                            R$ 19,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinha ck 16,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie calvin klein</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 26,99</span>
+                            R$ 16,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinha emoji 19,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie Emojis</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 23,99</span>
+                            R$ 19,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/CALCINHA17,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 19,99</span>
+                            R$ 17,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinha17,99Fio dental.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie Fio Dental</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 21,99</span>
+                            R$ 17,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/Calcinha18,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 21,99</span>
+                            R$ 18,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinha21,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 24,99</span>
+                            R$ 21,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinha22,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 32,99</span>
+                            R$ 22,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinha24,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 27,99</span>
+                            R$ 24,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/calcinhaplayboy 19,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha playboy</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 30,99</span>
+                            R$ 19,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/CK28,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie Calvin Klein</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 38,99</span>
+                            R$ 28,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/Conjunto 49,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$  59,99</span>
+                            R$ 49,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/lg17,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Lingerie</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 22,99</span>
+                            R$ 17,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminina/TOP FItness 54,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Top Fitness</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 64,99</span>
+                            R$ 54,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Ca21,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 21,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/cal17,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 17,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/calcinha15,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 15,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Calcinha16,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 16,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Calcinha19,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 19,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Calcinha25,00.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 25,00
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/calcinhavovo29,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 29,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/cinta suplex 29,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">cinta suplex</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 34,99</span>
+                            R$ 29,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/conjunto69,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">cinta suplex</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 74,99</span>
+                            R$ 69,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/conjunto74,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto Feminino</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 84,99</span>
+                            R$ 74,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/conjunto75,00.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto Feminino</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 84,99</span>
+                            R$ 75,00
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Conjunto79,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 84,99</span>
+                            R$ 79,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Conjunto84,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 94,99</span>
+                            R$ 84,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/ConjuntoJuveni 44,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto Juvenil</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 54,99</span>
+                            R$ 44,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/ConjuntoJuvenilCalvinKlein44,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Conjunto Juvenil Calvin Klein</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 54,99</span>
+                            R$ 44,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/meias 27,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">meias</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 44,99</span>
+                            R$ 27,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/superior54,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Top</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 64,99</span>
+                            R$ 54,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Superior69,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Top</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 84,99</span>
+                            R$ 69,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/sutia54,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">sutia</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 64,99</span>
+                            R$ 54,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Sutia59,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Sutia</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 64,99</span>
+                            R$ 59,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/Sutia60,00.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Sutia</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 64,99</span>
+                            R$ 60,00
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/sutian49,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Sutia</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 64,99</span>
+                            R$ 49,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/TOP54,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Top</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 64,99</span>
+                            R$ 54,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="mulher">
+                    <div class="product-badge mulher">Feminino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Feminia2/top69,99.jpg" alt="Vestido Floral">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Top</h3>
+                        <p class="product-price price-roupas">
+                            <span class="product-old-price">R$ 74,99</span>
+                            R$ 69,99
+                        </p>
+                        <p class="product-description">Vestido floral com corte midi e tecido leve para o verão.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-roupas">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-roupas">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Roupas Masculinas -->
+                <div class="product-card" data-category="homem">
+                    <div class="product-badge homem">Masculino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Masculina/CucasTommy27,99.jpg" alt="Camisa Social">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Cueca Tommy Hilfiger</h3>
+                        <p class="product-price price-tech">R$ 27,99</p>
+                        <p class="product-description">Cueca replica perfeita Tommy Hilfiger.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-tech">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="homem">
+                    <div class="product-badge homem">Masculino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Masculina/Cuecas 28,99.jpg" alt="Camisa Social">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">CuecaS</h3>
+                        <p class="product-price price-tech">R$ 28,99</p>
+                        <p class="product-description">Cueca tecido confortavel e resistente.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-tech">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="homem">
+                    <div class="product-badge homem">Masculino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Masculina/SAMBA cancao 37,99.jpg"alt="Camisa Social">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Samba Cancao</h3>
+                        <p class="product-price price-tech">R$ 37,99</p>
+                        <p class="product-description">Samba cancao para otimo para dormir.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-tech">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="homem">
+                    <div class="product-badge homem">Masculino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Masculina/SM 37,99.jpg" alt="Camisa Social">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Samba Cancao</h3>
+                        <p class="product-price price-tech">R$ 37,99</p>
+                        <p class="product-description">Samba cancao para otimo para dormir</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-tech">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="homem">
+                    <div class="product-badge homem">Masculino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Masculina2/CuecaDiferente27,99.jpg" alt="Camisa Social">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Cueca Masculina</h3>
+                        <p class="product-price price-tech">R$ 27,99</p>
+                        <p class="product-description">Cueca confortalve com otimo tecido</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-tech">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="homem">
+                    <div class="product-badge homem">Masculino</div>
+                    <div class="product-image">
+                        <img src="Roupas/Masculina2/Meia10,99.jpg" alt="Camisa Social">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Meias</h3>
+                        <p class="product-price price-tech">R$ 10,99</p>
+                        <p class="product-description">Meias confortaveis e resistentes</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-tech">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Roupas Infantis -->
+                <div class="product-card" data-category="crianca">
+                    <div class="product-badge crianca">Infantil</div>
+                    <div class="product-image">
+                        <img src="Roupas/infantil/14,99 calcinha .jpg" alt="Conjunto Infantil">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha Infantil </h3>
+                        <p class="product-price" style="color: #00B894;">R$ 14,99</p>
+                        <p class="product-description">Calcinha Infantil.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small" style="background-color: #00B894;">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline" style="border-color: #00B894; color: #00B894;">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="crianca">
+                    <div class="product-badge crianca">Infantil</div>
+                    <div class="product-image">
+                        <img src="Roupas/infantil/14,99 calcinha.jpg" alt="Conjunto Infantil">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha Infantil </h3>
+                        <p class="product-price" style="color: #00B894;">R$ 14,99</p>
+                        <p class="product-description">Calcinha Infantil.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small" style="background-color: #00B894;">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline" style="border-color: #00B894; color: #00B894;">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="crianca">
+                    <div class="product-badge crianca">Infantil</div>
+                    <div class="product-image">
+                        <img src="Roupas/infantil/calcinha 21,99.jpg" alt="Conjunto Infantil">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha Infantil </h3>
+                        <p class="product-price" style="color: #00B894;">R$  21,99</p>
+                        <p class="product-description">Calcinha Infantil.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small" style="background-color: #00B894;">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline" style="border-color: #00B894; color: #00B894;">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="crianca">
+                    <div class="product-badge crianca">Infantil</div>
+                    <div class="product-image">
+                        <img src="Roupas/infantil/calcinha22,00.jpg" alt="Conjunto Infantil">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Calcinha Infantil </h3>
+                        <p class="product-price" style="color: #00B894;">R$ 22,00</p>
+                        <p class="product-description">Calcinha Infantil.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small" style="background-color: #00B894;">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline" style="border-color: #00B894; color: #00B894;">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="crianca">
+                    <div class="product-badge crianca">Infantil</div>
+                    <div class="product-image">
+                        <img src="Roupas/infantil/cueca Infantil16,99.jpg" alt="Conjunto Infantil">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Cueca Infantil </h3>
+                        <p class="product-price" style="color: #00B894;">R$ 16,99</p>
+                        <p class="product-description">Cueca Infantil.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small" style="background-color: #00B894;">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline" style="border-color: #00B894; color: #00B894;">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="crianca">
+                    <div class="product-badge crianca">Infantil</div>
+                    <div class="product-image">
+                        <img src="Roupas/infantil/stich22,99.jpg" alt="Conjunto Infantil">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Roupas Infantil  </h3>
+                        <p class="product-price" style="color: #00B894;">R$ 22,99</p>
+                        <p class="product-description">Cueca Infantil.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small" style="background-color: #00B894;">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline" style="border-color: #00B894; color: #00B894;">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="crianca">
+                    <div class="product-badge crianca">Infantil</div>
+                    <div class="product-image">
+                        <img src="Roupas/Infantil2/Desenhos11,99.jpg" alt="Conjunto Infantil">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Roupas Infantil  </h3>
+                        <p class="product-price" style="color: #00B894;">R$ 11,99</p>
+                        <p class="product-description">Calcinha Infantil Desenhos.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small" style="background-color: #00B894;">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline" style="border-color: #00B894; color: #00B894;">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                 
+
+            
+            <div class="pagination">
+                <button class="pagination-btn prev" disabled>Anterior</button>
+                <span class="page-info">Página <span class="current-page">1</span> de <span class="total-pages">2</span></span>
+                <button class="pagination-btn next">Próximo</button>
+            </div>
+    </section>
+
+    <!-- Página de Tecnologia -->
+    <section id="tecnologia" class="page">
+        <div class="hero-tech">
+            <div class="hero-tech-content">
+                <h1>Tecnologia e Inovação</h1>
+                <p>Descubra nossos produtos tecnológicos de última geração</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2 class="section-title title-tech">Nossos Produtos</h2>
+            <p style="text-align: center; margin-bottom: 40px;">Em breve nossa seção de tecnologia!</p>
+        </div>
+        <div class="pagination">
+            <button class="pagination-btn prev" disabled>Anterior</button>
+            <span class="page-info">Página <span class="current-page">1</span> de <span class="total-pages">5</span></span>
+            <button class="pagination-btn next">Próximo</button>
+        </div>
+    </section>
+
+    <!-- Página de Contato -->
+    <section id="contato" class="page">
+        <div class="container">
+            <h2 class="section-title title-semi-joias">Entre em Contato</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px;">
+                <div class="contact-card">
+                    <div class="contact-icon icon-semi-joias">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <h3>Instagram</h3>
+                    <a href="https://www.instagram.com/francinebriquezi_naildesigner/" target="_blank">@francinebriquezi_naildesigner</a>
+                    <p style="margin-top: 10px;">Siga-nos para novidades e promoções exclusivas!</p>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-icon icon-semi-joias">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3>WhatsApp</h3>
+                    <a href="https://wa.me/+5514998053785" target="_blank">(14)99805-3785</a>
+                    <p style="margin-top: 10px;">Atendimento personalizado e rápido pelo WhatsApp.</p>
+                </div>
+
+ 
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Sobre Nós</h3>
+                    <p>Brilho Elegante traz as melhores semi joias e moda com qualidade e design exclusivo para valorizar seu estilo.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="#" data-page="home">Home</a></li>
+                        <li><a href="#" data-page="tecnologia">Tecnologia</a></li>
+                        <li><a href="#" data-page="roupas">Roupas</a></li>
+                        <li><a href="#" data-page="semi-joias">Semi Joias</a></li>
+                        <li><a href="#" data-page="contato">Contato</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contato</h3>
+                    <ul>
+                        <li><i class="fas fa-phone"></i><a href="whatsapp://send?phone=5514998053785"> (14)99805-3785</a></li>
+                        <li><i class="fas fa-map-marker-alt"></i> Bauru - SP</li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Redes Sociais</h3>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/francinebriquezi_naildesigner/" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://wa.me/5514998053785" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Brilho Elegante. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuração do WhatsApp
+            const whatsappNumber = '5514998053785'; // Seu número com código do país
+            const defaultMessage = "Olá, gostaria de comprar este produto do Brilho Elegante:";
+            const siteUrl = window.location.href.split('?')[0]; // URL base do site
+            
+            // Função para enviar mensagem
+            function sendWhatsAppMessage(productCard) {
+                // Extrai informações do produto
+                const productName = productCard.querySelector('.product-title').textContent;
+                const productPrice = productCard.querySelector('.product-price').textContent;
+                const productImage = productCard.querySelector('.product-image img').src;
+                
+                // Verifica se a imagem é relativa (começa com ImagemJoias/)
+                let imageUrl = productImage;
+                if (!productImage.startsWith('http') && !productImage.startsWith('data:')) {
+                    imageUrl = siteUrl + '/' + productImage;
+                }
+                
+                // Monta a mensagem
+                let message = `${defaultMessage}%0A%0A*${encodeURIComponent(productName)}*%0A`;
+                message += `*Preço:* ${encodeURIComponent(productPrice)}%0A%0A`;
+                message += `🔗 *Imagem do produto:* ${encodeURIComponent(imageUrl)}%0A%0A`;
+                message += "Por favor, me informe as formas de pagamento e prazo de entrega.";
+                
+                // Abre o WhatsApp
+                window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+            }
+            
+            // Adiciona evento a todos os botões do WhatsApp
+            document.querySelectorAll('.btn-semi-joias','.btn-roupas','').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productCard = this.closest('.product-card');
+                    sendWhatsAppMessage(productCard);
+                });
+            });
+        
+            // Navegação entre páginas (mantido do código original)
+            document.querySelectorAll('[data-page]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    document.body.setAttribute('data-page', pageId);
+                    document.querySelectorAll('.page').forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    document.getElementById(pageId).classList.add('active');
+                    document.querySelectorAll('.menu a').forEach(menuLink => {
+                        menuLink.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        
+            // Garante que links externos abram em nova aba
+            document.querySelectorAll('a[href*="instagram.com"], a[href*="wa.me"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if(this.getAttribute('target') !== '_blank') {
+                        e.preventDefault();
+                        window.open(this.href, '_blank');
+                    }
+                });
+            });
+        
+            // Filtro de categorias para semi joias (mantido do código original)
+            const filterBtns = document.querySelectorAll('#semi-joias .category-btn');
+            const productCards = document.querySelectorAll('#semi-joias .product-card');
+            
+            if(filterBtns.length > 0) {
+                filterBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        filterBtns.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                        const filter = this.getAttribute('data-category');
+                        
+                        productCards.forEach(card => {
+                            card.style.display = (filter === 'todos' || card.getAttribute('data-category') === filter) 
+                                ? 'block' 
+                                : 'none';
+                        });
+                        
+                        const visibleProducts = document.querySelectorAll('#semi-joias .product-card[style="display: block;"]');
+                        const noResults = document.querySelector('#semi-joias .no-results');
+                        
+                        if (visibleProducts.length === 0 && !noResults) {
+                            const productsContainer = document.querySelector('#semi-joias .products');
+                            const message = document.createElement('div');
+                            message.className = 'no-results';
+                            message.textContent = 'Nenhum produto encontrado nesta categoria.';
+                            productsContainer.appendChild(message);
+                        } else if (noResults && visibleProducts.length > 0) {
+                            noResults.remove();
+                        }
+                    });
+                });
+            }
+            
+            // Configuração da paginação e filtros para roupas (mantido do código original)
+            const clothingFilterBtns = document.querySelectorAll('#roupas .category-btn');
+            const clothingProducts = document.querySelectorAll('#roupas .product-card');
+            const productsPerPage = 12;
+            let currentFilter = 'todos';
+            let currentPage = 1;
+            
+            if(clothingFilterBtns.length > 0) {
+                const totalPagesSpan = document.querySelector('#roupas .total-pages');
+                const updateTotalPages = () => {
+                    const filteredProducts = Array.from(clothingProducts).filter(card => 
+                        currentFilter === 'todos' || card.getAttribute('data-category') === currentFilter
+                    );
+                    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+                    if(totalPagesSpan) totalPagesSpan.textContent = totalPages;
+                    return totalPages;
+                };
+                
+                const updateProductsDisplay = () => {
+                    clothingProducts.forEach(product => {
+                        product.style.display = 'none';
+                    });
+                    
+                    const filteredProducts = Array.from(clothingProducts).filter(card => 
+                        currentFilter === 'todos' || card.getAttribute('data-category') === currentFilter
+                    );
+                    
+                    const startIndex = (currentPage - 1) * productsPerPage;
+                    const endIndex = Math.min(startIndex + productsPerPage, filteredProducts.length);
+                    
+                    for (let i = startIndex; i < endIndex; i++) {
+                        if (filteredProducts[i]) {
+                            filteredProducts[i].style.display = 'block';
+                        }
+                    }
+                    
+                    if(document.querySelector('#roupas .current-page')) {
+                        document.querySelector('#roupas .current-page').textContent = currentPage;
+                    }
+                    
+                    const totalPages = updateTotalPages();
+                    const prevBtn = document.querySelector('#roupas .pagination-btn.prev');
+                    const nextBtn = document.querySelector('#roupas .pagination-btn.next');
+                    
+                    if(prevBtn) prevBtn.disabled = currentPage === 1;
+                    if(nextBtn) nextBtn.disabled = currentPage === totalPages;
+                    
+                    const visibleProducts = document.querySelectorAll('#roupas .product-card[style="display: block;"]');
+                    const noResults = document.querySelector('#roupas .no-results');
+                    
+                    if (visibleProducts.length === 0 && !noResults) {
+                        const productsContainer = document.querySelector('#roupas .products');
+                        if(productsContainer) {
+                            const message = document.createElement('div');
+                            message.className = 'no-results';
+                            message.textContent = 'Nenhum produto encontrado nesta categoria.';
+                            productsContainer.appendChild(message);
+                        }
+                    } else if (noResults && visibleProducts.length > 0) {
+                        noResults.remove();
+                    }
+                };
+                
+                clothingFilterBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        clothingFilterBtns.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                        currentFilter = this.getAttribute('data-category');
+                        currentPage = 1;
+                        updateProductsDisplay();
+                    });
+                });
+                
+                const prevBtn = document.querySelector('#roupas .pagination-btn.prev');
+                const nextBtn = document.querySelector('#roupas .pagination-btn.next');
+                
+                if(prevBtn) {
+                    prevBtn.addEventListener('click', function() {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            updateProductsDisplay();
+                        }
+                    });
+                }
+                
+                if(nextBtn) {
+                    nextBtn.addEventListener('click', function() {
+                        const totalPages = updateTotalPages();
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            updateProductsDisplay();
+                        }
+                    });
+                }
+                
+                updateProductsDisplay();
+            }
+        });
+        </script>
 </body>
 </html>
