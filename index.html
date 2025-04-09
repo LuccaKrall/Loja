@@ -2309,233 +2309,229 @@
     </footer>
 
     <script>
-        document.querySelectorAll('a[href*="instagram.com"], a[href*="wa.me"]').forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.open(this.href, '_blank');
-    });
-});
         document.addEventListener('DOMContentLoaded', function() {
-            // Menu hamburguer
+            // Elementos do menu mobile
             const hamburger = document.querySelector('.hamburger');
             const menu = document.querySelector('.menu');
+            const menuLinks = document.querySelectorAll('.menu a[data-page]');
             
+            // Função para fechar o menu mobile
+            function closeMobileMenu() {
+                hamburger.classList.remove('active');
+                menu.classList.remove('active');
+                const overlay = document.querySelector('.menu-overlay');
+                if(overlay) overlay.remove();
+            }
+            
+            // Abrir/fechar menu hamburguer
             if(hamburger && menu) {
-                hamburger.addEventListener('click', function() {
+                hamburger.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     this.classList.toggle('active');
                     menu.classList.toggle('active');
                     
-                    // Criar ou ativar overlay
+                    // Criar ou remover overlay
                     let overlay = document.querySelector('.menu-overlay');
                     if(!overlay) {
                         overlay = document.createElement('div');
                         overlay.className = 'menu-overlay';
                         document.body.appendChild(overlay);
                         
-                        // Fechar menu ao clicar no overlay
-                        overlay.addEventListener('click', function() {
-                            hamburger.classList.remove('active');
-                            menu.classList.remove('active');
-                            this.classList.remove('active');
-                        });
+                        overlay.addEventListener('click', closeMobileMenu);
+                    } else {
+                        overlay.remove();
                     }
-                    overlay.classList.toggle('active');
+                });
+            }
+            
+            // Navegação entre páginas
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    closeMobileMenu();
+                    
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+            
+            // Função para mostrar a página selecionada
+            function showPage(pageId) {
+                // Atualizar atributo no body
+                document.body.setAttribute('data-page', pageId);
+                
+                // Esconder todas as páginas
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
                 });
                 
-                // Fechar o menu quando um item for clicado
-                document.querySelectorAll('.menu a').forEach(link => {
-                    link.addEventListener('click', function() {
-                        hamburger.classList.remove('active');
-                        menu.classList.remove('active');
-                        const overlay = document.querySelector('.menu-overlay');
-                        if(overlay) overlay.classList.remove('active');
+                // Mostrar página selecionada
+                const targetPage = document.getElementById(pageId);
+                if(targetPage) {
+                    targetPage.classList.add('active');
+                    
+                    // Scroll suave para o topo
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
                     });
+                }
+                
+                // Atualizar link ativo no menu
+                menuLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('data-page') === pageId) {
+                        link.classList.add('active');
+                    }
                 });
             }
             
             // Configuração do WhatsApp
             const whatsappNumber = '5514998053785';
             const defaultMessage = "Olá, gostaria de comprar este produto do Brilho Elegante:";
-            const siteUrl = window.location.href.split('?')[0];
             
-            function sendWhatsAppMessage(productCard) {
-                const productName = productCard.querySelector('.product-title').textContent;
-                const productPrice = productCard.querySelector('.product-price').textContent;
-                const productImage = productCard.querySelector('.product-image img').src;
-                
-                let imageUrl = productImage;
-                if (!productImage.startsWith('http') && !productImage.startsWith('data:')) {
-                    imageUrl = siteUrl + '/' + productImage;
-                }
-                
-                let message = `${defaultMessage}%0A%0A*${encodeURIComponent(productName)}*%0A`;
-                message += `*Preço:* ${encodeURIComponent(productPrice)}%0A%0A`;
-                message += `🔗 *Imagem do produto:* ${encodeURIComponent(imageUrl)}%0A%0A`;
-                message += "Por favor, me informe as formas de pagamento e prazo de entrega.";
-                
-                window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-            }
-            
-            document.querySelectorAll('.btn-semi-joias, .btn-roupas').forEach(btn => {
+            document.querySelectorAll('.btn-whatsapp').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const productCard = this.closest('.product-card');
-                    sendWhatsAppMessage(productCard);
+                    if(productCard) {
+                        const productName = productCard.querySelector('.product-title').textContent;
+                        const productPrice = productCard.querySelector('.product-price').textContent;
+                        
+                        let message = `${defaultMessage}%0A%0A*${encodeURIComponent(productName)}*%0A`;
+                        message += `*Preço:* ${encodeURIComponent(productPrice)}%0A%0A`;
+                        message += "Por favor, me informe as formas de pagamento e prazo de entrega.";
+                        
+                        window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+                    }
                 });
             });
-        
-            // Navegação entre páginas
-            document.querySelectorAll('[data-page]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const pageId = this.getAttribute('data-page');
-                    document.body.setAttribute('data-page', pageId);
-                    document.querySelectorAll('.page').forEach(page => {
-                        page.classList.remove('active');
-                    });
-                    document.getElementById(pageId).classList.add('active');
-                    document.querySelectorAll('.menu a').forEach(menuLink => {
-                        menuLink.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                });
-            });
-        
-            // Filtro de categorias para semi joias
-            const filterBtns = document.querySelectorAll('#semi-joias .category-btn');
-            const productCards = document.querySelectorAll('#semi-joias .product-card');
             
-            if(filterBtns.length > 0) {
-                filterBtns.forEach(btn => {
+            // Filtros de categoria para semi joias
+            const semiJoiasFilters = document.querySelectorAll('#semi-joias .category-btn');
+            const semiJoiasProducts = document.querySelectorAll('#semi-joias .product-card');
+            
+            if(semiJoiasFilters.length > 0) {
+                semiJoiasFilters.forEach(btn => {
                     btn.addEventListener('click', function() {
-                        filterBtns.forEach(btn => btn.classList.remove('active'));
+                        semiJoiasFilters.forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
+                        
                         const filter = this.getAttribute('data-category');
                         
-                        productCards.forEach(card => {
-                            card.style.display = (filter === 'todos' || card.getAttribute('data-category') === filter) 
+                        semiJoiasProducts.forEach(product => {
+                            product.style.display = (filter === 'todos' || product.getAttribute('data-category') === filter) 
                                 ? 'block' 
                                 : 'none';
                         });
                         
+                        // Verificar se há resultados
                         const visibleProducts = document.querySelectorAll('#semi-joias .product-card[style="display: block;"]');
                         const noResults = document.querySelector('#semi-joias .no-results');
                         
-                        if (visibleProducts.length === 0 && !noResults) {
-                            const productsContainer = document.querySelector('#semi-joias .products');
+                        if(visibleProducts.length === 0 && !noResults) {
+                            const container = document.querySelector('#semi-joias .products');
                             const message = document.createElement('div');
                             message.className = 'no-results';
                             message.textContent = 'Nenhum produto encontrado nesta categoria.';
-                            productsContainer.appendChild(message);
-                        } else if (noResults && visibleProducts.length > 0) {
+                            container.appendChild(message);
+                        } else if(noResults && visibleProducts.length > 0) {
                             noResults.remove();
                         }
                     });
                 });
             }
             
-            // Configuração da paginação e filtros para roupas
-            const clothingFilterBtns = document.querySelectorAll('#roupas .category-btn');
+            // Paginação e filtros para roupas
+            const clothingFilters = document.querySelectorAll('#roupas .category-btn');
             const clothingProducts = document.querySelectorAll('#roupas .product-card');
             const productsPerPage = 12;
             let currentFilter = 'todos';
             let currentPage = 1;
             
-            if(clothingFilterBtns.length > 0) {
-                const totalPagesSpan = document.querySelector('#roupas .total-pages');
-                const updateTotalPages = () => {
-                    const filteredProducts = Array.from(clothingProducts).filter(card => 
-                        currentFilter === 'todos' || card.getAttribute('data-category') === currentFilter
-                    );
-                    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-                    if(totalPagesSpan) totalPagesSpan.textContent = totalPages;
-                    return totalPages;
-                };
-                
-                const updateProductsDisplay = () => {
-                    clothingProducts.forEach(product => {
-                        product.style.display = 'none';
+            if(clothingFilters.length > 0) {
+                // Função para atualizar a exibição dos produtos
+                function updateClothingDisplay() {
+                    // Filtrar produtos
+                    const filtered = Array.from(clothingProducts).filter(product => {
+                        return currentFilter === 'todos' || product.getAttribute('data-category') === currentFilter;
                     });
                     
-                    const filteredProducts = Array.from(clothingProducts).filter(card => 
-                        currentFilter === 'todos' || card.getAttribute('data-category') === currentFilter
-                    );
+                    // Calcular páginas
+                    const totalPages = Math.ceil(filtered.length / productsPerPage);
+                    document.querySelector('#roupas .total-pages').textContent = totalPages;
                     
-                    const startIndex = (currentPage - 1) * productsPerPage;
-                    const endIndex = Math.min(startIndex + productsPerPage, filteredProducts.length);
+                    // Esconder todos os produtos
+                    clothingProducts.forEach(p => p.style.display = 'none');
                     
-                    for (let i = startIndex; i < endIndex; i++) {
-                        if (filteredProducts[i]) {
-                            filteredProducts[i].style.display = 'block';
-                        }
-                    }
+                    // Mostrar produtos da página atual
+                    const start = (currentPage - 1) * productsPerPage;
+                    const end = start + productsPerPage;
                     
-                    if(document.querySelector('#roupas .current-page')) {
-                        document.querySelector('#roupas .current-page').textContent = currentPage;
-                    }
+                    filtered.slice(start, end).forEach(product => {
+                        product.style.display = 'block';
+                    });
                     
-                    const totalPages = updateTotalPages();
-                    const prevBtn = document.querySelector('#roupas .pagination-btn.prev');
-                    const nextBtn = document.querySelector('#roupas .pagination-btn.next');
+                    // Atualizar controles de paginação
+                    document.querySelector('#roupas .current-page').textContent = currentPage;
+                    document.querySelector('#roupas .prev').disabled = currentPage === 1;
+                    document.querySelector('#roupas .next').disabled = currentPage >= totalPages;
                     
-                    if(prevBtn) prevBtn.disabled = currentPage === 1;
-                    if(nextBtn) nextBtn.disabled = currentPage === totalPages;
-                    
-                    const visibleProducts = document.querySelectorAll('#roupas .product-card[style="display: block;"]');
+                    // Verificar se há resultados
+                    const visible = document.querySelectorAll('#roupas .product-card[style="display: block;"]');
                     const noResults = document.querySelector('#roupas .no-results');
                     
-                    if (visibleProducts.length === 0 && !noResults) {
-                        const productsContainer = document.querySelector('#roupas .products');
-                        if(productsContainer) {
-                            const message = document.createElement('div');
-                            message.className = 'no-results';
-                            message.textContent = 'Nenhum produto encontrado nesta categoria.';
-                            productsContainer.appendChild(message);
-                        }
-                    } else if (noResults && visibleProducts.length > 0) {
+                    if(visible.length === 0 && !noResults) {
+                        const container = document.querySelector('#roupas .products');
+                        const message = document.createElement('div');
+                        message.className = 'no-results';
+                        message.textContent = 'Nenhum produto encontrado.';
+                        container.appendChild(message);
+                    } else if(noResults && visible.length > 0) {
                         noResults.remove();
                     }
-                };
+                }
                 
-                clothingFilterBtns.forEach(btn => {
+                // Eventos dos filtros
+                clothingFilters.forEach(btn => {
                     btn.addEventListener('click', function() {
-                        clothingFilterBtns.forEach(btn => btn.classList.remove('active'));
+                        clothingFilters.forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
                         currentFilter = this.getAttribute('data-category');
                         currentPage = 1;
-                        updateProductsDisplay();
+                        updateClothingDisplay();
                     });
                 });
                 
-                const prevBtn = document.querySelector('#roupas .pagination-btn.prev');
-                const nextBtn = document.querySelector('#roupas .pagination-btn.next');
+                // Eventos da paginação
+                document.querySelector('#roupas .prev').addEventListener('click', function() {
+                    if(currentPage > 1) {
+                        currentPage--;
+                        updateClothingDisplay();
+                    }
+                });
                 
-                if(prevBtn) {
-                    prevBtn.addEventListener('click', function() {
-                        if (currentPage > 1) {
-                            currentPage--;
-                            updateProductsDisplay();
-                        }
-                    });
-                }
+                document.querySelector('#roupas .next').addEventListener('click', function() {
+                    const totalPages = Math.ceil(
+                        Array.from(clothingProducts).filter(p => 
+                            currentFilter === 'todos' || p.getAttribute('data-category') === currentFilter
+                        ).length / productsPerPage
+                    );
+                    
+                    if(currentPage < totalPages) {
+                        currentPage++;
+                        updateClothingDisplay();
+                    }
+                });
                 
-                if(nextBtn) {
-                    nextBtn.addEventListener('click', function() {
-                        const totalPages = updateTotalPages();
-                        if (currentPage < totalPages) {
-                            currentPage++;
-                            updateProductsDisplay();
-                        }
-                    });
-                }
-                
-                updateProductsDisplay();
+                // Inicializar
+                updateClothingDisplay();
             }
+            
+            // Inicializar página correta
+            const initialPage = document.body.getAttribute('data-page') || 'home';
+            showPage(initialPage);
         });
-    </script>
+        </script>
 </body>
 </html>
