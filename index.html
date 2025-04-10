@@ -2388,24 +2388,27 @@
             
             // Configuração do WhatsApp
             const whatsappNumber = '5514998053785';
-            const defaultMessage = "Olá, gostaria de comprar este produto do Brilho Elegante:";
-            
-            document.querySelectorAll('.btn-whatsapp').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const productCard = this.closest('.product-card');
-                    if(productCard) {
-                        const productName = productCard.querySelector('.product-title').textContent;
-                        const productPrice = productCard.querySelector('.product-price').textContent;
-                        
-                        let message = `${defaultMessage}%0A%0A*${encodeURIComponent(productName)}*%0A`;
-                        message += `*Preço:* ${encodeURIComponent(productPrice)}%0A%0A`;
-                        message += "Por favor, me informe as formas de pagamento e prazo de entrega.";
-                        
-                        window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-                    }
-                });
+        const defaultMessage = "Olá, gostaria de comprar este produto do Brilho Elegante:";
+
+        document.querySelectorAll('.btn-semi-joias,.btn-roupas').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productCard = this.closest('.product-card');
+                if(productCard) {
+                    const productName = productCard.querySelector('.product-title').textContent;
+                    const productPrice = productCard.querySelector('.product-price').textContent;
+                    const productImage = productCard.querySelector('.product-image img');
+                    const imageUrl = productImage ? productImage.src : '';
+                    
+                    let message = `${defaultMessage}%0A%0A*${encodeURIComponent(productName)}*%0A`;
+                    message += `*Preço:* ${encodeURIComponent(productPrice)}%0A`;
+                    message += `*Imagem do produto:* ${encodeURIComponent(imageUrl)}%0A%0A`;
+                    message += "Por favor, me informe as formas de pagamento e prazo de entrega.";
+                    
+                    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+                }
             });
+        });
             
             // Filtros de categoria para semi joias
             const semiJoiasFilters = document.querySelectorAll('#semi-joias .category-btn');
