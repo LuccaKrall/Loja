@@ -829,7 +829,7 @@
             <div class="hero-content">
                 <h1>Semi Joias que Transformam seu Estilo</h1>
                 <p>Descubra nossa coleção exclusiva de peças que combinam elegância e sofisticação</p>
-                <a href="#" data-page="semi-joias" class="btn btn-semi-joias">Ver Catálogo Completo</a>
+                <a href="#semi-joias" data-page="semi-joias" class="btn btn-semi-joias" id="catalogo-btn">Ver Catálogo Completo</a>
             </div>
         </div>
 
@@ -2310,10 +2310,21 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+                    document.getElementById('catalogo-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage('semi-joias');
+                    
+                    // Scroll suave para o topo da seção
+            window.scrollTo({
+                    top: document.getElementById('semi-joias').offsetTop,
+            behavior: 'smooth'
+              });
+            }       );
+
             // Elementos do menu mobile
             const hamburger = document.querySelector('.hamburger');
             const menu = document.querySelector('.menu');
-            const menuLinks = document.querySelectorAll('.menu a[data-page]');
+            const navLinks = document.querySelectorAll('nav a[data-page], footer a[data-page]');
             
             // Função para fechar o menu mobile
             function closeMobileMenu() {
@@ -2345,7 +2356,7 @@
             }
             
             // Navegação entre páginas
-            menuLinks.forEach(link => {
+            navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     closeMobileMenu();
@@ -2534,6 +2545,11 @@
             // Inicializar página correta
             const initialPage = document.body.getAttribute('data-page') || 'home';
             showPage(initialPage);
+        });
+                document.querySelector('.btn-semi-joias').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botão clicado, página:', this.getAttribute('data-page'));
+            showPage(this.getAttribute('data-page'));
         });
         </script>
 </body>
