@@ -17,10 +17,12 @@
             padding: 10px 20px;
             background-color: var(--roupas-primaria);
             color: var(--cor-clara);
-            border: none;
+            border: 2px solid transparent;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            min-width: 100px;
+            font-weight: 500;
         }
 
         .pagination-btn:disabled {
@@ -29,7 +31,8 @@
         }
 
         .pagination-btn:hover:not(:disabled) {
-            background-color: var(--roupas-destaque);
+            border-color: currentColor;
+            background: transparent;
         }
 
         .page-info {
@@ -48,6 +51,7 @@
         }
         :root {
             /* Cores base */
+            --cor-destaque-infantil: #00B894;
             --cor-clara: #FFFFFF;
             --cor-texto: #333333;
             --cor-texto-claro: #666666;
@@ -393,23 +397,25 @@
         /* Produtos */
         .products {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 60px;
+            padding: 0 1rem;
         }
 
         .product-card {
+           
             background-color: var(--cor-clara);
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px var(--cor-sombra);
-            transition: all 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
             position: relative;
         }
 
         .product-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px var(--cor-sombra-forte);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
         }
 
         .product-image {
@@ -431,14 +437,17 @@
 
         .product-badge {
             position: absolute;
+            background: linear-gradient(45deg, #ff4757, #ff6b81);
+            box-shadow: 0 2px 8px rgba(255,71,87,0.3);
             top: 10px;
             right: 10px;
             color: white;
-            padding: 5px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 0.8em;
             font-weight: 600;
             z-index: 2;
+            text-transform: uppercase;
         }
 
         .product-badge.mulher {
@@ -462,7 +471,8 @@
         }
 
         .product-title {
-            font-size: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 10px;
             color: var(--cor-texto);
         }
@@ -508,7 +518,26 @@
             padding: 8px 15px;
             font-size: 14px;
         }
-
+        .btn {
+        position: relative;
+        overflow: hidden;
+        }
+        .btn:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+        }
+        .btn:hover:after {
+            width: 200px;
+            height: 200px;
+        }
         .btn-outline {
             background-color: transparent;
             color: var(--cor-texto);
@@ -650,26 +679,24 @@
 }
 
 .carousel-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
+  position: absolute;
+  bottom: 30px;
+  gap: 8px;
 }
 
 .carousel-controls button {
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  padding: 0;
+  background: rgba(255,255,255,0.5);
+  transition: all 0.3s;
 }
 
-.carousel-controls button:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+.carousel-controls button.active {
+  background: var(--cor-clara);
+  width: 24px;
+  border-radius: 8px;
 }
 
         /* Footer */
@@ -840,7 +867,8 @@
             }
             
             .section-title {
-                font-size: 30px;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
             }
             
             .category-filters, .clothing-filters {
@@ -1037,6 +1065,72 @@
     
                 
                 <!-- Brincos -->
+                
+                <div class="product-card" data-category="brincos">
+                    <div class="product-badge semi-joias">Promoção</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/Brinco2/Brincos_A_Partir_De_8,00.jpg" alt="Brincos Prateados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Brincos</h3>
+                        <p class="product-price price-semi-joias">R$ 8,00</p>
+                        <p class="product-description">Brincos a partir de R$8,00 <ruby></ruby></p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="brincos">
+                    <div class="product-badge semi-joias">Promoção</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/Brinco2/Brincos_A_Partir_De_8,02.jpg" alt="Brincos Prateados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Brincos</h3>
+                        <p class="product-price price-semi-joias">R$ 8,00</p>
+                        <p class="product-description">>Brincos a partir de R$8,00<ruby></ruby></p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="brincos">
+                    <div class="product-badge semi-joias">Promoção</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/Brinco2/Brincos_A_Partir_De_8,03.jpg" alt="Brincos Prateados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Brincos</h3>
+                        <p class="product-price price-semi-joias">R$ 8,00</p>
+                        <p class="product-description">Brincos a partir de R$8,00<ruby></ruby></p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="brincos">
+                    <div class="product-badge semi-joias">Promoção</div>
+                    <div class="product-image">
+                        <img src="ImagemJoias/Brinco2/Brincos_a_Partir_De_8,01.jpg" alt="Brincos Prateados">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Brincos</h3>
+                        <p class="product-price price-semi-joias">R$ 8,00</p>
+                        <p class="product-description">Brincos a partir de R$8,00<ruby></ruby></p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+
                 <div class="product-card" data-category="brincos">
                     <div class="product-badge semi-joias">Promoção</div>
                     <div class="product-image">
@@ -1084,7 +1178,35 @@
                 </div>
                 <!-- Anéis -->
 
-                
+                <div class="product-card" data-category="aneis">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Anel2/Aneis_A_Partir_De_40,00.jpg" alt="Anel Zirconia">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Aneis Diversos</h3>
+                        <p class="product-price price-semi-joias">R$ 40,00</p>
+                        <p class="product-description">Diversos aneis apartir de 40,00</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="aneis">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Anel2/Aneis_A_Partir_De_40,01.jpg" alt="Anel Zirconia">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Aneis Diversos</h3>
+                        <p class="product-price price-semi-joias">R$ 40,00</p>
+                        <p class="product-description">Diversos aneis apartir de 40,00</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="product-card" data-category="aneis">
                     <div class="product-image">
@@ -1102,14 +1224,107 @@
                 </div>
                 
                 <!-- Pulseiras -->
+               
                 <div class="product-card" data-category="pulseiras">
                     <div class="product-image">
-                        <img src="ImagemJoias/pulseiras/20250323_175451(1).jpg" alt="Pulseira Dupla">
+                        <img src="ImagemJoias/Pulseira/Pulseiras_A_Partir_de_43,00.jpg" alt="Pulseira Dupla">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pulseiras Diversas</h3>
+                        <p class="product-price price-semi-joias">R$ 43,00</p>
+                        <p class="product-description">Pulseiras Diversas a partir de:R$ 43,00.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="pulseiras">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Pulseira/Pulseiras_Ouro_A_Partir_de_40,00.jpg" alt="Pulseira Dupla">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pulseiras Diversas</h3>
+                        <p class="product-price price-semi-joias">R$ 40,00</p>
+                        <p class="product-description">Pulseiras Diversas a partir de:R$ 40,00.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="pulseiras">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Pulseira/Pulseiras_Ouro_A_Partir_de_43,00.jpg" alt="Pulseira Dupla">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pulseiras Diversas</h3>
+                        <p class="product-price price-semi-joias">R$ 43,00</p>
+                        <p class="product-description">Pulseiras Diversas a partir de:R$ 43,00.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="pulseiras">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Pulseira/Pulseiras_Prata_A_Partir_De_48,00.jpg" alt="Pulseira Dupla">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pulseiras Diversas:</h3>
+                        <p class="product-price price-semi-joias">R$  48,00</p>
+                        <p class="product-description">Pulseiras Diversas a partir de:R$ 48,00.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="pulseiras">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Pulseira/Pulsereiras_a_Partir_de_43,00.jpg" alt="Pulseira Dupla">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Pulseiras Diversas</h3>
+                        <p class="product-price price-semi-joias">R$ 43,00</p>
+                        <p class="product-description">Pulseiras Diversas a partir de:R$ 43,00.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card" data-category="pulseiras">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Pulseira/Tornozeleiras_E_Pulseiras_A_Partir_de_43,00.jpg" alt="Pulseira Dupla">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Tornozeleiras e Pulseiras Infantil</h3>
+                        <p class="product-price price-semi-joias">R$ 43,00</p>
+                        <p class="product-description">Tornozeleiras e Pulseiras Infantil a partir de R43,00.</p>
+                        <div class="product-actions">
+                            <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
+                            <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+
+
+               
+                <div class="product-card" data-category="pulseiras">
+                    <div class="product-image">
+                        <img src="ImagemJoias/Pulseira/Tornozeleiras_E_PulseirasInfantil_A_Partir_de_33,00.jpg" alt="Pulseira Dupla">
                     </div>
                     <div class="product-info">
                         <h3 class="product-title">Pulseiras Diversas a partir de:</h3>
-                        <p class="product-price price-semi-joias">R$ 37,70</p>
-                        <p class="product-description">Conjunto de duas pulseiras em ouro rose e prata.</p>
+                        <p class="product-price price-semi-joias">R$ 33,00</p>
+                        <p class="product-description">Tornozeleiras e Pulseiras Infantil a partir de R$33,00.</p>
                         <div class="product-actions">
                             <a href="#" class="btn btn-small btn-semi-joias btn-whatsapp">Comprar</a>
                             <a href="#" class="btn btn-small btn-outline-semi-joias">Detalhes</a>
@@ -3165,6 +3380,7 @@
             console.log('Botão clicado, página:', this.getAttribute('data-page'));
             showPage(this.getAttribute('data-page'));
         });
+            
         </script>
 </body>
 </html>
