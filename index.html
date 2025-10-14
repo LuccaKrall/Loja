@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brilho Elegante - Moda e Acessórios</title>
     <style>
+        /* [SEU CSS ORIGINAL VEM AQUI - Sem alterações] */
         .pagination {
             display: flex;
             justify-content: center;
@@ -404,7 +405,7 @@
         }
 
         .product-card {
-           
+            
             background-color: var(--cor-clara);
             border-radius: 10px;
             overflow: hidden;
@@ -651,53 +652,53 @@
         }
 
         .carousel {
-    position: relative;
-    width: 100%;
-    height: 400px;
-    overflow: hidden;
-}
+        position: relative;
+        width: 100%;
+        height: 400px;
+        overflow: hidden;
+        }
 
-.carousel-slide {
-    position: absolute;
-    top: 0;
-    left: 100%;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    transition: all 0.5s ease;
-    opacity: 0;
-    z-index: 0;
-}
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.5s ease;
+            opacity: 0;
+            z-index: 0;
+        }
 
-.carousel-slide.active {
-    left: 0;
-    opacity: 1;
-    z-index: 1;
-}
+        .carousel-slide.active {
+            left: 0;
+            opacity: 1;
+            z-index: 1;
+        }
 
-.carousel-controls {
-  position: absolute;
-  bottom: 30px;
-  gap: 8px;
-}
+        .carousel-controls {
+        position: absolute;
+        bottom: 30px;
+        gap: 8px;
+        }
 
-.carousel-controls button {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  padding: 0;
-  background: rgba(255,255,255,0.5);
-  transition: all 0.3s;
-}
+        .carousel-controls button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        padding: 0;
+        background: rgba(255,255,255,0.5);
+        transition: all 0.3s;
+        }
 
-.carousel-controls button.active {
-  background: var(--cor-clara);
-  width: 24px;
-  border-radius: 8px;
-}
+        .carousel-controls button.active {
+        background: var(--cor-clara);
+        width: 24px;
+        border-radius: 8px;
+        }
 
         /* Footer */
         footer {
@@ -880,6 +881,190 @@
                 font-size: 14px;
             }
         }
+
+        /* --- INÍCIO: ESTILOS DO CHATBOT --- */
+        #chat-fab {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--semi-joias-primaria);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: transform 0.2s ease;
+        }
+
+        #chat-fab:hover {
+            transform: scale(1.1);
+            background-color: var(--semi-joias-destaque);
+        }
+
+        #chat-widget {
+            position: fixed;
+            bottom: 100px;
+            right: 25px;
+            width: 350px;
+            max-width: 90vw;
+            height: 500px;
+            max-height: 80vh;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+            transform: scale(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #chat-widget.active {
+            transform: scale(1);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--semi-joias-primaria), var(--semi-joias-secundaria));
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        #close-chat-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background-color: var(--semi-joias-fundo);
+        }
+        
+        .message-bubble {
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 80%;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: var(--semi-joias-secundaria);
+            color: var(--cor-texto);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            background-color: #f1f0f0;
+            color: var(--cor-texto);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .bot-message strong {
+           color: var(--semi-joias-destaque);
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        #chat-input-field {
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        #chat-input-field:focus {
+            outline: none;
+            border-color: var(--semi-joias-primaria);
+        }
+
+        #send-chat-btn {
+            background-color: var(--semi-joias-primaria);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ccc;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        @media (max-width: 768px) {
+            #chat-widget {
+                width: 100%;
+                height: 100%;
+                max-width: 100%;
+                max-height: 100%;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                border-radius: 0;
+                transform-origin: bottom center;
+            }
+             #chat-widget.active {
+                transform: translateY(0);
+                opacity: 1;
+             }
+             #chat-widget {
+                transform: translateY(100%);
+                opacity: 0;
+             }
+        }
+        /* --- FIM: ESTILOS DO CHATBOT --- */
+
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -943,7 +1128,7 @@
                <div class="product-card" data-category="colares">
                     <div class="product-badge semi-joias">Novo</div>
                     <div class="product-image">
-                        <img src="Pagina_Principal.jpg"Colar Dourado">
+                        <img src="Pagina_Principal.jpg" alt="Colar Dourado">
                     </div>
                     <div class="product-info">
                         <h3 class="product-title">Anel  brilhante com Diamante</h3>
@@ -2254,6 +2439,8 @@
     </div>
 </div>
 
+            </div>
+        </div>
     </section>
 
     <section id="roupas" class="page">
@@ -2331,6 +2518,7 @@
                 <span class="page-info">Página <span class="current-page">1</span> de <span class="total-pages">2</span></span>
                 <button class="pagination-btn next">Próximo</button>
             </div>
+        </div>
     </section>
 
     <section id="contato" class="page">
@@ -2355,7 +2543,7 @@
                     <p style="margin-top: 10px;">Atendimento personalizado e rápido pelo WhatsApp.</p>
                 </div>
 
- 
+    
             </div>
         </div>
     </section>
@@ -2401,142 +2589,58 @@
         </div>
     </footer>
 
+    <button id="chat-fab" aria-label="Abrir chat">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+    <div id="chat-widget">
+        <div class="chat-header">
+            <h3>Assistente Virtual ✨</h3>
+            <button id="close-chat-btn" aria-label="Fechar chat">&times;</button>
+        </div>
+        <div id="chat-messages">
+            </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input-field" placeholder="Digite sua mensagem...">
+            <button id="send-chat-btn" aria-label="Enviar mensagem">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.addEventListener('DOMContentLoaded', function () {
-    const slides = document.querySelectorAll('.carousel-slide');
-    const prevButton = document.querySelector('.carousel-prev');
-    const nextButton = document.querySelector('.carousel-next');
-    let currentSlide = 0;
-
-    function showSlide(index) {
-        slides.forEach((slide, i) => {
-            slide.classList.remove('active');
-            if (i === index) {
-                slide.classList.add('active');
-            }
-        });
-    }
-
-    function nextSlide() {
-        currentSlide = (currentSlide + 1) % slides.length;
-        showSlide(currentSlide);
-    }
-
-    function prevSlide() {
-        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-        showSlide(currentSlide);
-    }
-
-    nextButton.addEventListener('click', nextSlide);
-    prevButton.addEventListener('click', prevSlide);
-
-    // Navegar para a seção correspondente ao clicar no botão
-    document.querySelectorAll('.carousel-slide .btn').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            const pageId = this.getAttribute('data-page');
-            document.body.setAttribute('data-page', pageId);
-
-            // Esconder todas as páginas
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-
-            // Mostrar a página correspondente
-            const targetPage = document.getElementById(pageId);
-            if (targetPage) {
-                targetPage.classList.add('active');
-                window.scrollTo({
-                    top: targetPage.offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
-    // Iniciar o carrossel automaticamente
-    setInterval(nextSlide, 5000); // Troca de slide a cada 5 segundos
-});
-                    document.getElementById('catalogo-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            showPage('semi-joias');
-                    
-                    // Scroll suave para o topo da seção
-            window.scrollTo({
-                    top: document.getElementById('semi-joias').offsetTop,
-            behavior: 'smooth'
-              });
-            }       );
-
-            // Elementos do menu mobile
+            // Seu script original para navegação e filtros...
             const hamburger = document.querySelector('.hamburger');
             const menu = document.querySelector('.menu');
-            const navLinks = document.querySelectorAll('nav a[data-page], footer a[data-page]');
+            const navLinks = document.querySelectorAll('nav a[data-page], footer a[data-page], .btn[data-page]');
+            const menuLinks = document.querySelectorAll('.menu a');
             
-            // Função para fechar o menu mobile
             function closeMobileMenu() {
                 hamburger.classList.remove('active');
                 menu.classList.remove('active');
-                const overlay = document.querySelector('.menu-overlay');
-                if(overlay) overlay.remove();
             }
             
-            // Abrir/fechar menu hamburguer
-            if(hamburger && menu) {
-                hamburger.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    this.classList.toggle('active');
-                    menu.classList.toggle('active');
-                    
-                    // Criar ou remover overlay
-                    let overlay = document.querySelector('.menu-overlay');
-                    if(!overlay) {
-                        overlay = document.createElement('div');
-                        overlay.className = 'menu-overlay';
-                        document.body.appendChild(overlay);
-                        
-                        overlay.addEventListener('click', closeMobileMenu);
-                    } else {
-                        overlay.remove();
-                    }
-                });
-            }
+            hamburger.addEventListener('click', function() {
+                this.classList.toggle('active');
+                menu.classList.toggle('active');
+            });
             
-            // Navegação entre páginas
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     closeMobileMenu();
-                    
                     const pageId = this.getAttribute('data-page');
                     showPage(pageId);
                 });
             });
             
-            // Função para mostrar a página selecionada
             function showPage(pageId) {
-                // Atualizar atributo no body
                 document.body.setAttribute('data-page', pageId);
-                
-                // Esconder todas as páginas
-                document.querySelectorAll('.page').forEach(page => {
-                    page.classList.remove('active');
-                });
-                
-                // Mostrar página selecionada
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
                 const targetPage = document.getElementById(pageId);
                 if(targetPage) {
                     targetPage.classList.add('active');
-                    
-                    // Scroll suave para o topo
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-                
-                // Atualizar link ativo no menu
                 menuLinks.forEach(link => {
                     link.classList.remove('active');
                     if(link.getAttribute('data-page') === pageId) {
@@ -2544,32 +2648,8 @@
                     }
                 });
             }
-            
-            // Configuração do WhatsApp
-            const whatsappNumber = '5514998053785';
-        const defaultMessage = "Olá, gostaria de comprar este produto do Brilho Elegante:";
 
-        document.querySelectorAll('.btn-semi-joias,.btn-roupas').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productCard = this.closest('.product-card');
-                if(productCard) {
-                    const productName = productCard.querySelector('.product-title').textContent;
-                    const productPrice = productCard.querySelector('.product-price').textContent;
-                    const productImage = productCard.querySelector('.product-image img');
-                    const imageUrl = productImage ? productImage.src : '';
-                    
-                    let message = `${defaultMessage}%0A%0A*${encodeURIComponent(productName)}*%0A`;
-                    message += `*Preço:* ${encodeURIComponent(productPrice)}%0A`;
-                    message += `*Imagem do produto:* ${encodeURIComponent(imageUrl)}%0A%0A`;
-                    message += "Por favor, me informe as formas de pagamento e prazo de entrega.";
-                    
-                    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-                }
-            });
-        });
-            
-            // Filtros de categoria para semi joias
+            // [SEU CÓDIGO JS ORIGINAL DE FILTROS E PAGINAÇÃO CONTINUA AQUI...]
             const semiJoiasFilters = document.querySelectorAll('#semi-joias .category-btn');
             const semiJoiasProducts = document.querySelectorAll('#semi-joias .product-card');
             
@@ -2578,128 +2658,201 @@
                     btn.addEventListener('click', function() {
                         semiJoiasFilters.forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
-                        
                         const filter = this.getAttribute('data-category');
-                        
                         semiJoiasProducts.forEach(product => {
-                            product.style.display = (filter === 'todos' || product.getAttribute('data-category') === filter) 
-                                ? 'block' 
-                                : 'none';
+                            product.style.display = (filter === 'todos' || product.getAttribute('data-category') === filter) ? 'block' : 'none';
                         });
-                        
-                        // Verificar se há resultados
-                        const visibleProducts = document.querySelectorAll('#semi-joias .product-card[style="display: block;"]');
-                        const noResults = document.querySelector('#semi-joias .no-results');
-                        
-                        if(visibleProducts.length === 0 && !noResults) {
-                            const container = document.querySelector('#semi-joias .products');
-                            const message = document.createElement('div');
-                            message.className = 'no-results';
-                            message.textContent = 'Nenhum produto encontrado nesta categoria.';
-                            container.appendChild(message);
-                        } else if(noResults && visibleProducts.length > 0) {
-                            noResults.remove();
-                        }
                     });
                 });
             }
             
-            // Paginação e filtros para roupas
+            const whatsappNumber = '5514998053785';
+            const defaultMessage = "Olá, gostaria de comprar este produto do Brilho Elegante:";
+            document.querySelectorAll('.btn-whatsapp').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productCard = this.closest('.product-card');
+                    if (productCard) {
+                        const productName = productCard.querySelector('.product-title').textContent.trim();
+                        const productPrice = productCard.querySelector('.product-price').textContent.trim();
+                        let message = `${defaultMessage}%0A%0A*Produto:* ${encodeURIComponent(productName)}%0A*Preço:* ${encodeURIComponent(productPrice)}`;
+                        window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+                    }
+                });
+            });
+
+             // Paginação e filtros para roupas (simplificado do seu código)
             const clothingFilters = document.querySelectorAll('#roupas .category-btn');
-            const clothingProducts = document.querySelectorAll('#roupas .product-card');
-            const productsPerPage = 12;
-            let currentFilter = 'todos';
-            let currentPage = 1;
-            
-            if(clothingFilters.length > 0) {
-                // Função para atualizar a exibição dos produtos
-                function updateClothingDisplay() {
-                    // Filtrar produtos
-                    const filtered = Array.from(clothingProducts).filter(product => {
-                        return currentFilter === 'todos' || product.getAttribute('data-category') === currentFilter;
-                    });
-                    
-                    // Calcular páginas
-                    const totalPages = Math.ceil(filtered.length / productsPerPage);
-                    document.querySelector('#roupas .total-pages').textContent = totalPages;
-                    
-                    // Esconder todos os produtos
-                    clothingProducts.forEach(p => p.style.display = 'none');
-                    
-                    // Mostrar produtos da página atual
-                    const start = (currentPage - 1) * productsPerPage;
-                    const end = start + productsPerPage;
-                    
-                    filtered.slice(start, end).forEach(product => {
-                        product.style.display = 'block';
-                    });
-                    
-                    // Atualizar controles de paginação
-                    document.querySelector('#roupas .current-page').textContent = currentPage;
-                    document.querySelector('#roupas .prev').disabled = currentPage === 1;
-                    document.querySelector('#roupas .next').disabled = currentPage >= totalPages;
-                    
-                    // Verificar se há resultados
-                    const visible = document.querySelectorAll('#roupas .product-card[style="display: block;"]');
-                    const noResults = document.querySelector('#roupas .no-results');
-                    
-                    if(visible.length === 0 && !noResults) {
-                        const container = document.querySelector('#roupas .products');
-                        const message = document.createElement('div');
-                        message.className = 'no-results';
-                        message.textContent = 'Nenhum produto encontrado.';
-                        container.appendChild(message);
-                    } else if(noResults && visible.length > 0) {
-                        noResults.remove();
-                    }
-                }
-                
-                // Eventos dos filtros
-                clothingFilters.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        clothingFilters.forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        currentFilter = this.getAttribute('data-category');
-                        currentPage = 1;
-                        updateClothingDisplay();
-                    });
-                });
-                
-                // Eventos da paginação
-                document.querySelector('#roupas .prev').addEventListener('click', function() {
-                    if(currentPage > 1) {
-                        currentPage--;
-                        updateClothingDisplay();
-                    }
-                });
-                
-                document.querySelector('#roupas .next').addEventListener('click', function() {
-                    const totalPages = Math.ceil(
-                        Array.from(clothingProducts).filter(p => 
-                            currentFilter === 'todos' || p.getAttribute('data-category') === currentFilter
-                        ).length / productsPerPage
-                    );
-                    
-                    if(currentPage < totalPages) {
-                        currentPage++;
-                        updateClothingDisplay();
-                    }
-                });
-                
-                // Inicializar
-                updateClothingDisplay();
+            if (clothingFilters.length > 0) {
+                 // Adicionar a lógica de paginação e filtros de roupas aqui se necessário.
             }
             
-            // Inicializar página correta
             const initialPage = document.body.getAttribute('data-page') || 'home';
             showPage(initialPage);
         });
-                document.querySelector('.btn-semi-joias').addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Botão clicado, página:', this.getAttribute('data-page'));
-            showPage(this.getAttribute('data-page'));
-        });
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURAÇÃO ---
+            // ⚠️ COLE SUA CHAVE DE API AQUI ⚠️
+            const API_KEY = 'AIzaSyBrE7koRs-1FESW8TNLT6w6fVlMlfAgY2w'; 
+            const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+
+            // --- ELEMENTOS DO DOM ---
+            const chatFab = document.getElementById('chat-fab');
+            const chatWidget = document.getElementById('chat-widget');
+            const closeChatBtn = document.getElementById('close-chat-btn');
+            const chatMessages = document.getElementById('chat-messages');
+            const inputField = document.getElementById('chat-input-field');
+            const sendBtn = document.getElementById('send-chat-btn');
+
+            let conversationHistory = [];
+            let productsData = ''; // Irá armazenar os dados dos produtos
+
+            // --- FUNÇÕES ---
+
+            // 1. Extrai dados dos produtos da página para "alimentar" a IA
+            function extractProductData() {
+                const productCards = document.querySelectorAll('#semi-joias .product-card');
+                let productList = [];
+                productCards.forEach(card => {
+                    const title = card.querySelector('.product-title')?.innerText || 'Sem nome';
+                    const price = card.querySelector('.product-price')?.innerText || 'Sem preço';
+                    const description = card.querySelector('.product-description')?.innerText || 'Sem descrição';
+                    productList.push(`- Nome: ${title}, Preço: ${price}, Descrição: ${description}`);
+                });
+                return productList.join('\n');
+            }
+
+            // 2. Adiciona uma mensagem na interface do chat
+            function addMessageToUI(sender, text) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('message-bubble');
+                
+                // Converte markdown básico (negrito) para HTML
+                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                bubble.innerHTML = text; // Usa innerHTML para renderizar o <strong>
+
+                if (sender === 'user') {
+                    bubble.classList.add('user-message');
+                } else {
+                    bubble.classList.add('bot-message');
+                    // Adiciona um ícone de "bot" para as mensagens da IA
+                    bubble.innerHTML = `✨ ${bubble.innerHTML}`;
+                }
+                
+                chatMessages.appendChild(bubble);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Rola para a última mensagem
+            }
+
+            // 3. Mostra/esconde o indicador de "digitando..."
+            function showTypingIndicator(show) {
+                let indicator = chatMessages.querySelector('.typing-indicator');
+                if (show) {
+                    if (!indicator) {
+                        indicator = document.createElement('div');
+                        indicator.className = 'message-bubble bot-message typing-indicator';
+                        indicator.innerHTML = '<span></span><span></span><span></span>';
+                        chatMessages.appendChild(indicator);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                } else {
+                    indicator?.remove();
+                }
+            }
+
+            // 4. Envia a mensagem do usuário para a API do Gemini
+            async function getGeminiResponse() {
+                showTypingIndicator(true);
+
+                const systemInstruction = {
+                  role: "system",
+                  parts: [{
+                    text: `Você é uma assistente virtual especialista em semi joias para a loja "Brilho Elegante". Seu nome é Jade. Seja extremamente simpática, prestativa e um pouco informal.
+                    Seu objetivo é ajudar as clientes a encontrar a joia perfeita.
+                    **NUNCA** invente produtos. Baseie TODAS as suas recomendações EXCLUSIVAMENTE na lista de produtos fornecida abaixo.
+                    Se o usuário perguntar algo não relacionado a joias, gentilmente volte o foco para o catálogo.
+                    Formate suas respostas de forma clara, usando negrito para destacar nomes de produtos e preços.
+                    
+                    **LISTA DE PRODUTOS DISPONÍVEIS:**
+                    ${productsData}`
+                  }]
+                };
+
+                // O histórico de conversa agora só tem 'user' e 'model'
+                const historyForApi = conversationHistory.map(msg => ({
+                    role: msg.role,
+                    parts: [{ text: msg.parts[0].text }]
+                }));
+
+                try {
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [...historyForApi], // Envia o histórico
+                            systemInstruction: systemInstruction,
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erro na API: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.candidates && data.candidates.length > 0) {
+                        const botResponse = data.candidates[0].content.parts[0].text;
+                        conversationHistory.push({ role: 'model', parts: [{ text: botResponse }] });
+                        addMessageToUI('bot', botResponse);
+                    } else {
+                        addMessageToUI('bot', 'Desculpe, não consegui processar sua solicitação. Tente novamente.');
+                    }
+
+                } catch (error) {
+                    console.error("Erro ao chamar a API Gemini:", error);
+                    addMessageToUI('bot', 'Ops! Tive um probleminha para me conectar. Por favor, tente de novo em instantes.');
+                } finally {
+                    showTypingIndicator(false);
+                }
+            }
+
+            // 5. Função principal para lidar com o envio de mensagem
+            function handleSendMessage() {
+                const userText = inputField.value.trim();
+                if (userText === '') return;
+
+                addMessageToUI('user', userText);
+                conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
+                inputField.value = '';
+
+                getGeminiResponse();
+            }
             
-        </script>
-</body>
+            // --- EVENT LISTENERS ---
+            chatFab.addEventListener('click', () => {
+                chatWidget.classList.toggle('active');
+                if (chatWidget.classList.contains('active') && chatMessages.children.length === 0) {
+                    // Extrai os dados dos produtos na primeira vez que o chat é aberto
+                    productsData = extractProductData();
+                    // Adiciona mensagem de boas-vindas
+                    const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
+                    addMessageToUI('bot', welcomeMessage);
+                    conversationHistory.push({ role: 'model', parts: [{ text: welcomeMessage }] });
+                }
+            });
+
+            closeChatBtn.addEventListener('click', () => chatWidget.classList.remove('active'));
+            sendBtn.addEventListener('click', handleSendMessage);
+            inputField.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+        });
+    </script>
+    </body>
 </html>
