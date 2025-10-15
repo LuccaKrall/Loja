@@ -2693,83 +2693,81 @@
     </script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- CONFIGURAÇÃO ---
-            // ⚠️ COLE SUA CHAVE DE API AQUI ⚠️
-            const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4'; 
-            const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4';;
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURAÇÃO ---
+        // ⚠️ COLE SUA CHAVE DE API AQUI ⚠️
+        const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4'; // Substitua pelo seu valor real
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+        // --- ELEMENTOS DO DOM ---
+        const chatFab = document.getElementById('chat-fab');
+        const chatWidget = document.getElementById('chat-widget');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const chatMessages = document.getElementById('chat-messages');
+        const inputField = document.getElementById('chat-input-field');
+        const sendBtn = document.getElementById('send-chat-btn');
 
-            // --- ELEMENTOS DO DOM ---
-            const chatFab = document.getElementById('chat-fab');
-            const chatWidget = document.getElementById('chat-widget');
-            const closeChatBtn = document.getElementById('close-chat-btn');
-            const chatMessages = document.getElementById('chat-messages');
-            const inputField = document.getElementById('chat-input-field');
-            const sendBtn = document.getElementById('send-chat-btn');
+        let conversationHistory = [];
+        let productsData = ''; // Irá armazenar os dados dos produtos
 
-            let conversationHistory = [];
-            let productsData = ''; // Irá armazenar os dados dos produtos
+        // --- FUNÇÕES ---
 
-            // --- FUNÇÕES ---
+        // 1. Extrai dados dos produtos da página para "alimentar" a IA
+        function extractProductData() {
+            const productCards = document.querySelectorAll('#semi-joias .product-card');
+            let productList = [];
+            productCards.forEach(card => {
+                const title = card.querySelector('.product-title')?.innerText || 'Sem nome';
+                const price = card.querySelector('.product-price')?.innerText.trim().split('\n').pop().trim() || 'Sem preço';
+                const description = card.querySelector('.product-description')?.innerText || 'Sem descrição';
+                productList.push(`- Nome: ${title}, Preço: ${price}, Descrição: ${description}`);
+            });
+            return productList.join('\n');
+        }
 
-            // 1. Extrai dados dos produtos da página para "alimentar" a IA
-            function extractProductData() {
-                const productCards = document.querySelectorAll('#semi-joias .product-card');
-                let productList = [];
-                productCards.forEach(card => {
-                    const title = card.querySelector('.product-title')?.innerText || 'Sem nome';
-                    const price = card.querySelector('.product-price')?.innerText || 'Sem preço';
-                    const description = card.querySelector('.product-description')?.innerText || 'Sem descrição';
-                    productList.push(`- Nome: ${title}, Preço: ${price}, Descrição: ${description}`);
-                });
-                return productList.join('\n');
+        // 2. Adiciona uma mensagem na interface do chat
+        function addMessageToUI(sender, text) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('message-bubble');
+            
+            // Converte markdown básico (negrito) para HTML
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            bubble.innerHTML = text; // Usa innerHTML para renderizar o <strong>
+
+            if (sender === 'user') {
+                bubble.classList.add('user-message');
+            } else {
+                bubble.classList.add('bot-message');
+                bubble.innerHTML = `✨ ${bubble.innerHTML}`;
             }
+            
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-            // 2. Adiciona uma mensagem na interface do chat
-            function addMessageToUI(sender, text) {
-                const bubble = document.createElement('div');
-                bubble.classList.add('message-bubble');
-                
-                // Converte markdown básico (negrito) para HTML
-                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                
-                bubble.innerHTML = text; // Usa innerHTML para renderizar o <strong>
-
-                if (sender === 'user') {
-                    bubble.classList.add('user-message');
-                } else {
-                    bubble.classList.add('bot-message');
-                    // Adiciona um ícone de "bot" para as mensagens da IA
-                    bubble.innerHTML = `✨ ${bubble.innerHTML}`;
+        // 3. Mostra/esconde o indicador de "digitando..."
+        function showTypingIndicator(show) {
+            let indicator = chatMessages.querySelector('.typing-indicator');
+            if (show) {
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.className = 'message-bubble bot-message typing-indicator';
+                    indicator.innerHTML = '<span></span><span></span><span></span>';
+                    chatMessages.appendChild(indicator);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
-                
-                chatMessages.appendChild(bubble);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Rola para a última mensagem
+            } else {
+                indicator?.remove();
             }
+        }
 
-            // 3. Mostra/esconde o indicador de "digitando..."
-            function showTypingIndicator(show) {
-                let indicator = chatMessages.querySelector('.typing-indicator');
-                if (show) {
-                    if (!indicator) {
-                        indicator = document.createElement('div');
-                        indicator.className = 'message-bubble bot-message typing-indicator';
-                        indicator.innerHTML = '<span></span><span></span><span></span>';
-                        chatMessages.appendChild(indicator);
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    }
-                } else {
-                    indicator?.remove();
-                }
-            }
+        // 4. Envia a mensagem do usuário para a API do Gemini
+        async function getGeminiResponse() {
+            showTypingIndicator(true);
 
-            // 4. Envia a mensagem do usuário para a API do Gemini
-            async function getGeminiResponse() {
-                showTypingIndicator(true);
-
-                const systemInstruction = {
-                  role: "system",
-                  parts: [{
+            // CORREÇÃO 3: Removido 'role: "system"'
+            const systemInstruction = {
+                parts: [{
                     text: `Você é uma assistente virtual especialista em semi joias para a loja "Brilho Elegante". Seu nome é Jade. Seja extremamente simpática, prestativa e um pouco informal.
                     Seu objetivo é ajudar as clientes a encontrar a joia perfeita.
                     **NUNCA** invente produtos. Baseie TODAS as suas recomendações EXCLUSIVAMENTE na lista de produtos fornecida abaixo.
@@ -2778,81 +2776,81 @@
                     
                     **LISTA DE PRODUTOS DISPONÍVEIS:**
                     ${productsData}`
-                  }]
-                };
+                }]
+            };
 
-                // O histórico de conversa agora só tem 'user' e 'model'
-                const historyForApi = conversationHistory.map(msg => ({
-                    role: msg.role,
-                    parts: [{ text: msg.parts[0].text }]
-                }));
+            const historyForApi = conversationHistory.map(msg => ({
+                role: msg.role,
+                parts: [{ text: msg.parts[0].text }]
+            }));
 
-                try {
-                    const response = await fetch(GEMINI_API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [...historyForApi], // Envia o histórico
-                            systemInstruction: systemInstruction,
-                        })
-                    });
+            try {
+                // CORREÇÃO 1: Usando a variável correta GEMINI_API_URL
+                const response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [...historyForApi],
+                        // CORREÇÃO 2: Usando 'system_instruction' com underscore
+                        system_instruction: systemInstruction,
+                    })
+                });
 
-                    if (!response.ok) {
-                        throw new Error(`Erro na API: ${response.statusText}`);
-                    }
-
-                    const data = await response.json();
-                    
-                    if (data.candidates && data.candidates.length > 0) {
-                        const botResponse = data.candidates[0].content.parts[0].text;
-                        conversationHistory.push({ role: 'model', parts: [{ text: botResponse }] });
-                        addMessageToUI('bot', botResponse);
-                    } else {
-                        addMessageToUI('bot', 'Desculpe, não consegui processar sua solicitação. Tente novamente.');
-                    }
-
-                } catch (error) {
-                    console.error("Erro ao chamar a API Gemini:", error);
-                    addMessageToUI('bot', 'Ops! Tive um probleminha para me conectar. Por favor, tente de novo em instantes.');
-                } finally {
-                    showTypingIndicator(false);
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`Erro na API: ${response.status} ${response.statusText} - ${errorBody}`);
                 }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates.length > 0) {
+                    const botResponse = data.candidates[0].content.parts[0].text;
+                    conversationHistory.push({ role: 'model', parts: [{ text: botResponse }] });
+                    addMessageToUI('bot', botResponse);
+                } else {
+                    addMessageToUI('bot', 'Desculpe, não consegui processar sua solicitação. Tente novamente.');
+                }
+
+            } catch (error) {
+                console.error("Erro ao chamar a API Gemini:", error);
+                addMessageToUI('bot', 'Ops! Tive um probleminha para me conectar. Por favor, tente de novo em instantes.');
+            } finally {
+                showTypingIndicator(false);
             }
+        }
 
-            // 5. Função principal para lidar com o envio de mensagem
-            function handleSendMessage() {
-                const userText = inputField.value.trim();
-                if (userText === '') return;
+        // 5. Função principal para lidar com o envio de mensagem
+        function handleSendMessage() {
+            const userText = inputField.value.trim();
+            if (userText === '') return;
 
-                addMessageToUI('user', userText);
-                conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
-                inputField.value = '';
+            addMessageToUI('user', userText);
+            conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
+            inputField.value = '';
 
-                getGeminiResponse();
+            getGeminiResponse();
+        }
+        
+        // --- EVENT LISTENERS ---
+        chatFab.addEventListener('click', () => {
+            chatWidget.classList.toggle('active');
+            if (chatWidget.classList.contains('active') && chatMessages.children.length === 0) {
+                productsData = extractProductData();
+                const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
+                addMessageToUI('bot', welcomeMessage);
+                // Não adicionamos a mensagem de boas-vindas ao histórico para não confundir a IA
             }
-            
-            // --- EVENT LISTENERS ---
-            chatFab.addEventListener('click', () => {
-                chatWidget.classList.toggle('active');
-                if (chatWidget.classList.contains('active') && chatMessages.children.length === 0) {
-                    // Extrai os dados dos produtos na primeira vez que o chat é aberto
-                    productsData = extractProductData();
-                    // Adiciona mensagem de boas-vindas
-                    const welcomeMessage = "Olá! ✨ Sou a Jadi, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
-                    addMessageToUI('bot', welcomeMessage);
-                    conversationHistory.push({ role: 'model', parts: [{ text: welcomeMessage }] });
-                }
-            });
-
-            closeChatBtn.addEventListener('click', () => chatWidget.classList.remove('active'));
-            sendBtn.addEventListener('click', handleSendMessage);
-            inputField.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleSendMessage();
-                }
-            });
         });
-    </script>
+
+        closeChatBtn.addEventListener('click', () => chatWidget.classList.remove('active'));
+        sendBtn.addEventListener('click', handleSendMessage);
+        inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+    });
+</script>
     </body>
 </html>
