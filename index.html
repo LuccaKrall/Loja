@@ -2692,147 +2692,263 @@
         });
     </script>
     
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- CONFIGURAÇÃO ---
-        const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4'; // Lembre-se de colocar sua chave real
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- CONFIGURAÇÃO ---
+    const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4';
+    
+    // URL corrigida com modelo atual
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${API_KEY}`;
 
-        // --- ELEMENTOS DO DOM ---
-        const chatFab = document.getElementById('chat-fab');
-        const chatWidget = document.getElementById('chat-widget');
-        const closeChatBtn = document.getElementById('close-chat-btn');
-        const chatMessages = document.getElementById('chat-messages');
-        const inputField = document.getElementById('chat-input-field');
-        const sendBtn = document.getElementById('send-chat-btn');
+    // --- ELEMENTOS DO DOM ---
+    const chatFab = document.getElementById('chat-fab');
+    const chatWidget = document.getElementById('chat-widget');
+    const closeChatBtn = document.getElementById('close-chat-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    const inputField = document.getElementById('chat-input-field');
+    const sendBtn = document.getElementById('send-chat-btn');
 
-        let conversationHistory = [];
-        
-        // --- FUNÇÕES ---
+    let isProcessing = false;
+    
+    // --- FUNÇÕES ---
 
-        function extractProductData() {
-            const productCards = document.querySelectorAll('#semi-joias .product-card');
-            let productList = [];
-            productCards.forEach(card => {
-                const title = card.querySelector('.product-title')?.innerText || 'Sem nome';
-                const price = card.querySelector('.product-price')?.innerText.trim().split('\n').pop().trim() || 'Sem preço';
-                const description = card.querySelector('.product-description')?.innerText || 'Sem descrição';
-                productList.push(`- Nome: ${title}, Preço: ${price}, Descrição: ${description}`);
-            });
-            return productList.join('\n');
+    function extractProductData() {
+        const productCards = document.querySelectorAll('#semi-joias .product-card');
+        let productList = [];
+        productCards.forEach(card => {
+            const title = card.querySelector('.product-title')?.innerText || 'Sem nome';
+            const price = card.querySelector('.product-price')?.innerText.trim() || 'Sem preço';
+            const description = card.querySelector('.product-description')?.innerText || 'Sem descrição';
+            const category = card.getAttribute('data-category') || 'geral';
+            productList.push(`- ${title} | Preço: ${price} | Categoria: ${category} | Descrição: ${description}`);
+        });
+        return productList.join('\n');
+    }
+
+    function addMessageToUI(sender, text) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('message-bubble');
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        bubble.innerHTML = text;
+        if (sender === 'user') {
+            bubble.classList.add('user-message');
+        } else {
+            bubble.classList.add('bot-message');
+            bubble.innerHTML = `✨ ${bubble.innerHTML}`;
         }
+        chatMessages.appendChild(bubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 
-        function addMessageToUI(sender, text) {
-            const bubble = document.createElement('div');
-            bubble.classList.add('message-bubble');
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            bubble.innerHTML = text;
-            if (sender === 'user') {
-                bubble.classList.add('user-message');
-            } else {
-                bubble.classList.add('bot-message');
-                bubble.innerHTML = `✨ ${bubble.innerHTML}`;
+    function showTypingIndicator(show) {
+        let indicator = chatMessages.querySelector('.typing-indicator');
+        if (show) {
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'message-bubble bot-message typing-indicator';
+                indicator.innerHTML = '<span></span><span></span><span></span>';
+                chatMessages.appendChild(indicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-            chatMessages.appendChild(bubble);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+        } else {
+            indicator?.remove();
         }
+    }
 
-        function showTypingIndicator(show) {
-            let indicator = chatMessages.querySelector('.typing-indicator');
-            if (show) {
-                if (!indicator) {
-                    indicator = document.createElement('div');
-                    indicator.className = 'message-bubble bot-message typing-indicator';
-                    indicator.innerHTML = '<span></span><span></span><span></span>';
-                    chatMessages.appendChild(indicator);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-            } else {
-                indicator?.remove();
-            }
-        }
+    // Sistema de prompt otimizado
+    function createSystemPrompt(userMessage) {
+        const productsData = extractProductData();
         
-        // CORREÇÃO: Função para iniciar o chat e definir o histórico inicial
-        function initializeChat() {
-            const productsData = extractProductData();
-            const welcomeMessage = "Olá! ✨ Sou a Jados, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
-            
-            // A instrução do sistema agora é a primeira mensagem do histórico
-            conversationHistory = [
+        return `Você é a Jade, assistente virtual da loja de semi joias "Brilho Elegante".
+
+CATÁLOGO DE PRODUTOS DISPONÍVEIS:
+${productsData}
+
+REGRAS IMPORTANTES:
+1. Baseie-se APENAS nos produtos listados acima
+2. NUNCA invente produtos que não estejam na lista
+3. Seja simpática, prestativa e informal
+4. Formate respostas claras, usando **negrito** para nomes e preços
+5. Valor máximo dos produtos: R$ 300,00
+6. Se não souber responder sobre algo fora do catálogo, diga gentilmente
+
+Pergunta do usuário: "${userMessage}"
+
+Sua resposta (seja útil e amigável):`;
+    }
+
+    async function getGeminiResponse(userMessage) {
+        const systemPrompt = createSystemPrompt(userMessage);
+        
+        const requestBody = {
+            contents: [
                 {
-                    "role": "user",
-                    "parts": [{ "text": `Você é uma assistente virtual especialista em semi joias para a loja "Brilho Elegante". Seu nome é Jade. Seja extremamente simpática, prestativa e um pouco informal. Seu objetivo é ajudar as clientes a encontrar a joia perfeita. **NUNCA** invente produtos. Baseie TODAS as suas recomendações EXCLUSIVAMENTE na lista de produtos fornecida abaixo. Se o usuário perguntar algo não relacionado a joias, gentilmente volte o foco para o catálogo. Formate suas respostas de forma clara, usando negrito para destacar nomes de produtos e preços.\n\n**LISTA DE PRODUTOS DISPONÍVEIS:**\n${productsData}` }]
+                    role: "user",
+                    parts: [
+                        { 
+                            text: systemPrompt
+                        }
+                    ]
+                }
+            ],
+            generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 800,
+            },
+            safetySettings: [
+                {
+                    category: "HARM_CATEGORY_HARASSMENT",
+                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
                 },
                 {
-                    "role": "model",
-                    "parts": [{ "text": welcomeMessage }]
+                    category: "HARM_CATEGORY_HATE_SPEECH", 
+                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
                 }
-            ];
+            ]
+        };
+
+        try {
+            const response = await fetch(GEMINI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                // Se ainda der erro, vamos tentar uma URL alternativa
+                if (response.status === 404) {
+                    throw new Error('Modelo não encontrado. Tentando abordagem alternativa...');
+                }
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
             
-            // Adiciona apenas a mensagem de boas-vindas do bot na tela
-            addMessageToUI('bot', welcomeMessage);
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                throw new Error('Resposta da API inválida');
+            }
+            
+            return data.candidates[0].content.parts[0].text;
+            
+        } catch (error) {
+            console.error('Erro na API Gemini:', error);
+            // Fallback: resposta local baseada nos produtos
+            return generateLocalResponse(userMessage);
         }
-
-async function getGeminiResponse(prompt) {
-    const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
-    
-    const requestBody = {
-        contents: [{
-            parts: [{
-                text: prompt
-            }]
-        }]
-    };
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-        
-    } catch (error) {
-        console.error('Erro ao chamar API Gemini:', error);
-        throw error;
     }
-}
 
-        function handleSendMessage() {
-            const userText = inputField.value.trim();
-            if (userText === '') return;
-            addMessageToUI('user', userText);
-            conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
-            inputField.value = '';
-            getGeminiResponse();
+    // Sistema de fallback local
+    function generateLocalResponse(userMessage) {
+        const lowerMessage = userMessage.toLowerCase();
+        const productsData = extractProductData();
+        
+        // Análise simples da mensagem do usuário
+        if (lowerMessage.includes('ola') || lowerMessage.includes('oi') || lowerMessage.includes('olá')) {
+            return "Olá! 😊 Sou a Jade, assistente da Brilho Elegante. Posso ajudar você a encontrar colares, brincos, anéis, pulseiras e muito mais! O que você está procurando?";
         }
         
-        // --- EVENT LISTENERS ---
-        chatFab.addEventListener('click', () => {
-            chatWidget.classList.toggle('active');
-            if (chatWidget.classList.contains('active') && chatMessages.children.length === 0) {
-                initializeChat();
-            }
-        });
+        if (lowerMessage.includes('colar') || lowerMessage.includes('colares')) {
+            const colares = Array.from(document.querySelectorAll('#semi-joias .product-card[data-category="colares"]')).slice(0, 3);
+            let response = "**Encontrei estes colares para você:**\n\n";
+            colares.forEach((card, index) => {
+                const title = card.querySelector('.product-title')?.innerText || 'Colar';
+                const price = card.querySelector('.product-price')?.innerText.trim() || 'Consultar preço';
+                response += `${index + 1}. **${title}** - ${price}\n`;
+            });
+            response += "\nPosso mostrar mais colares se quiser!";
+            return response;
+        }
+        
+        if (lowerMessage.includes('brinco') || lowerMessage.includes('brincos')) {
+            const brincos = Array.from(document.querySelectorAll('#semi-joias .product-card[data-category="brincos"]')).slice(0, 3);
+            let response = "**Aqui estão alguns brincos lindos:**\n\n";
+            brincos.forEach((card, index) => {
+                const title = card.querySelector('.product-title')?.innerText || 'Brinco';
+                const price = card.querySelector('.product-price')?.innerText.trim() || 'Consultar preço';
+                response += `${index + 1}. **${title}** - ${price}\n`;
+            });
+            return response;
+        }
+        
+        if (lowerMessage.includes('preço') || lowerMessage.includes('valor') || lowerMessage.includes('quanto custa')) {
+            return "Os preços das nossas semi joias variam de R$ 27,00 a R$ 249,00, dependendo da peça. Posso te ajudar a encontrar algo dentro do seu orçamento! 💰";
+        }
+        
+        if (lowerMessage.includes('entrega') || lowerMessage.includes('frete') || lowerMessage.includes('envio')) {
+            return "Entregamos para todo Brasil! 🚚 O prazo e valor do frete variam por região. Entre em contato pelo WhatsApp (14) 99805-3785 para calcular o frete exato!";
+        }
+        
+        // Resposta padrão
+        return `Desculpe, estou com limitações técnicas no momento. 😔 
 
-        closeChatBtn.addEventListener('click', () => chatWidget.classList.remove('active'));
-        sendBtn.addEventListener('click', handleSendMessage);
-        inputField.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleSendMessage();
-            }
-        });
+Para um atendimento personalizado, entre em contato diretamente:
+📱 **WhatsApp:** (14) 99805-3785
+📸 **Instagram:** @brilho_elegante1
+
+Posso te ajudar com informações sobre **colares, brincos, anéis, pulseiras** ou **berloques**! O que você gostaria de ver?`;
+    }
+
+    async function handleSendMessage() {
+        if (isProcessing) return;
+        
+        const userText = inputField.value.trim();
+        if (userText === '') return;
+        
+        // Adiciona mensagem do usuário
+        addMessageToUI('user', userText);
+        inputField.value = '';
+        
+        isProcessing = true;
+        showTypingIndicator(true);
+        
+        try {
+            const botResponse = await getGeminiResponse(userText);
+            addMessageToUI('bot', botResponse);
+        } catch (error) {
+            console.error('Erro ao processar mensagem:', error);
+            const fallbackResponse = "Desculpe, estou com problemas técnicos. 😔 Entre em contato pelo WhatsApp (14) 99805-3785 para um atendimento personalizado!";
+            addMessageToUI('bot', fallbackResponse);
+        } finally {
+            showTypingIndicator(false);
+            isProcessing = false;
+        }
+    }
+
+    function initializeChat() {
+        const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Estou aqui para ajudar você a encontrar a semi joia perfeita! Como posso te ajudar hoje?";
+        addMessageToUI('bot', welcomeMessage);
+    }
+
+    // --- EVENT LISTENERS ---
+    chatFab.addEventListener('click', () => {
+        chatWidget.classList.toggle('active');
+        if (chatWidget.classList.contains('active') && chatMessages.children.length === 0) {
+            initializeChat();
+        }
     });
+
+    closeChatBtn.addEventListener('click', () => chatWidget.classList.remove('active'));
+    
+    sendBtn.addEventListener('click', handleSendMessage);
+    
+    inputField.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    });
+
+    // Fechar chat ao clicar fora (para mobile)
+    document.addEventListener('click', (e) => {
+        if (!chatWidget.contains(e.target) && !chatFab.contains(e.target) && chatWidget.classList.contains('active')) {
+            chatWidget.classList.remove('active');
+        }
+    });
+});
 </script>
     </body>
 </html>
