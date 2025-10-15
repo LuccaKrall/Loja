@@ -2755,7 +2755,7 @@
         // CORREÇÃO: Função para iniciar o chat e definir o histórico inicial
         function initializeChat() {
             const productsData = extractProductData();
-            const welcomeMessage = "Olá! ✨ Sou a Jadis, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
+            const welcomeMessage = "Olá! ✨ Sou a Jados, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
             
             // A instrução do sistema agora é a primeira mensagem do histórico
             conversationHistory = [
@@ -2773,47 +2773,39 @@
             addMessageToUI('bot', welcomeMessage);
         }
 
-        async function getGeminiResponse() {
-            showTypingIndicator(true);
-            
-            // Mapeia o histórico para o formato da API
-            const historyForApi = conversationHistory.map(msg => ({
-                role: msg.role,
-                parts: [{ text: msg.parts[0].text }]
-            }));
+async function getGeminiResponse(prompt) {
+    const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+    
+    const requestBody = {
+        contents: [{
+            parts: [{
+                text: prompt
+            }]
+        }]
+    };
 
-            try {
-                const response = await fetch(GEMINI_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    // CORREÇÃO: Envia apenas o 'contents', sem 'system_instruction'
-                    body: JSON.stringify({
-                        contents: historyForApi
-                    })
-                });
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
 
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    throw new Error(`Erro na API: ${response.status}  - ${errorBody}`);
-                }
-
-                const data = await response.json();
-                
-                if (data.candidates && data.candidates.length > 0) {
-                    const botResponse = data.candidates[0].content.parts[0].text;
-                    conversationHistory.push({ role: 'model', parts: [{ text: botResponse }] });
-                    addMessageToUI('bot', botResponse);
-                } else {
-                    addMessageToUI('bot', 'Desculpe, não consegui processar sua solicitação. Tente novamente.');
-                }
-
-            } catch (error) {
-                console.error("Erro ao chamar a API Gemini:", error);
-                addMessageToUI('bot', 'Ops! Tive um probleminha para me conectar. Por favor, tente de novo em instantes.');
-            } finally {
-                showTypingIndicator(false);
-            }
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
         }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+        
+    } catch (error) {
+        console.error('Erro ao chamar API Gemini:', error);
+        throw error;
+    }
+}
 
         function handleSendMessage() {
             const userText = inputField.value.trim();
