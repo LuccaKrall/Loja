@@ -2696,7 +2696,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIGURAÇÃO ---
             // ⚠️ COLE SUA CHAVE DE API AQUI ⚠️
-            const API_KEY = 'AIzaSyBcFyOFleqjVcTDPwmKKqr-Mz298V9rEXw'; 
+            const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4'; 
             const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
 
             // --- ELEMENTOS DO DOM ---
@@ -2838,7 +2838,7 @@
                     // Extrai os dados dos produtos na primeira vez que o chat é aberto
                     productsData = extractProductData();
                     // Adiciona mensagem de boas-vindas
-                    const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
+                    const welcomeMessage = "Olá! ✨ Sou a Jadi, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
                     addMessageToUI('bot', welcomeMessage);
                     conversationHistory.push({ role: 'model', parts: [{ text: welcomeMessage }] });
                 }
