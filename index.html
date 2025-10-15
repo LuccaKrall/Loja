@@ -2693,133 +2693,528 @@
     </script>
     
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- CONFIGURAÇÃO ---
-    const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4';
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${API_KEY}`;
+// 🎯 SCRIPT COMPLETO JADE BOT - BRILHO ELEGANTE (ATUALIZADO)
 
-    // --- ELEMENTOS DO DOM ---
-    const chatFab = document.getElementById('chat-fab');
-    const chatWidget = document.getElementById('chat-widget');
-    const closeChatBtn = document.getElementById('close-chat-btn');
-    const chatMessages = document.getElementById('chat-messages');
-    const inputField = document.getElementById('chat-input-field');
-    const sendBtn = document.getElementById('send-chat-btn');
+document.addEventListener('DOMContentLoaded', function() {
+    // =============================================
+    // CONFIGURAÇÕES GERAIS
+    // =============================================
+    const CONFIG = {
+        GEMINI_API_KEY: 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4',
+        GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent',
+        WHATSAPP_NUMBER: '5514998053785',
+        MAX_HISTORY_LENGTH: 10,
+        TYPING_DELAY: 1000
+    };
 
-    let isProcessing = false;
-    let conversationHistory = [];
-    
-    // --- FUNÇÕES ---
+    // =============================================
+    // PERSONALIDADE JADE
+    // =============================================
+    const JADE_PERSONALITY = {
+        name: "Jade",
+        role: "Consultora de Semi Joias",
+        store: "Brilho Elegante",
+        tone: "Elegante, acolhedora e entusiástica",
+        style: "Conversa natural como entre amigas",
+        traits: ["Paciente", "Empática", "Conhecedora de moda", "Estilosa"],
+        emojis: ["💎", "✨", "💖", "🌟", "😊"]
+    };
 
-    function extractProductData() {
-        const productCards = document.querySelectorAll('#semi-joias .product-card');
-        let productList = [];
-        productCards.forEach(card => {
-            const title = card.querySelector('.product-title')?.innerText || 'Sem nome';
-            const price = card.querySelector('.product-price')?.innerText.trim() || 'Sem preço';
-            const description = card.querySelector('.product-description')?.innerText || 'Sem descrição';
-            const category = card.getAttribute('data-category') || 'geral';
-            productList.push(`- ${title} | Preço: ${price} | Categoria: ${category} | Descrição: ${description}`);
+    // =============================================
+    // ELEMENTOS DO DOM
+    // =============================================
+    const chatElements = {
+        fab: document.getElementById('chat-fab'),
+        widget: document.getElementById('chat-widget'),
+        closeBtn: document.getElementById('close-chat-btn'),
+        messages: document.getElementById('chat-messages'),
+        input: document.getElementById('chat-input-field'),
+        sendBtn: document.getElementById('send-chat-btn')
+    };
+
+    // =============================================
+    // ESTADO DA APLICAÇÃO (ATUALIZADO)
+    // =============================================
+    let appState = {
+        isProcessing: false,
+        conversationHistory: [],
+        currentCategory: null,
+        userPreferences: {},
+        lastInteraction: Date.now(),
+        
+        // NOVO: ESTADO DE VENDAS
+        saleState: {
+            inProgress: false,
+            selectedProducts: [],
+            customerData: {
+                name: '',
+                address: '', 
+                payment: ''
+            },
+            currentStep: 'consultation' // consultation → selection → closing
+        }
+    };
+
+    // =============================================
+    // SISTEMA DE GERENCIAMENTO DE VENDAS
+    // =============================================
+    function updateSaleState(action, data = null) {
+        switch (action) {
+            case 'START_SALE':
+                appState.saleState.inProgress = true;
+                appState.saleState.currentStep = 'consultation';
+                console.log('🛍️ Venda iniciada - Etapa: Consulta');
+                break;
+                
+            case 'ADD_PRODUCT':
+                if (data && !appState.saleState.selectedProducts.find(p => p.id === data.id)) {
+                    appState.saleState.selectedProducts.push(data);
+                    console.log('📦 Produto adicionado:', data.title);
+                }
+                break;
+                
+            case 'SET_CUSTOMER_DATA':
+                if (data.field && data.value) {
+                    appState.saleState.customerData[data.field] = data.value;
+                    console.log('👤 Dado do cliente atualizado:', data.field, data.value);
+                }
+                break;
+                
+            case 'NEXT_STEP':
+                const steps = ['consultation', 'selection', 'closing'];
+                const currentIndex = steps.indexOf(appState.saleState.currentStep);
+                if (currentIndex < steps.length - 1) {
+                    appState.saleState.currentStep = steps[currentIndex + 1];
+                    console.log('➡️ Avançando para etapa:', appState.saleState.currentStep);
+                }
+                break;
+                
+            case 'COMPLETE_SALE':
+                console.log('✅ Venda finalizada - Gerando resumo...');
+                const message = generateSaleSummary();
+                sendToWhatsApp(message);
+                
+                // Reseta estado
+                appState.saleState = {
+                    inProgress: false,
+                    selectedProducts: [],
+                    customerData: { name: '', address: '', payment: '' },
+                    currentStep: 'consultation'
+                };
+                break;
+                
+            case 'CANCEL_SALE':
+                console.log('❌ Venda cancelada');
+                appState.saleState = {
+                    inProgress: false,
+                    selectedProducts: [],
+                    customerData: { name: '', address: '', payment: '' },
+                    currentStep: 'consultation'
+                };
+                break;
+        }
+    }
+
+    function generateSaleSummary() {
+        const products = appState.saleState.selectedProducts;
+        const customer = appState.saleState.customerData;
+        
+        let message = `🛍️ *PEDIDO - BRILHO ELEGANTE* 🛍️\n\n`;
+        message += `*Cliente:* ${customer.name}\n`;
+        message += `*Endereço:* ${customer.address}\n`;
+        message += `*Pagamento:* ${customer.payment}\n\n`;
+        message += `*PRODUTOS SELECIONADOS:*\n`;
+        
+        products.forEach((product, index) => {
+            message += `${index + 1}. ${product.title} - ${product.price}\n`;
         });
-        return productList.join('\n');
+        
+        message += `\n*Total de produtos:* ${products.length}\n`;
+        message += `\nObrigada pela preferência! 💎`;
+        
+        return message;
     }
 
-    function addMessageToUI(sender, text) {
-        const bubble = document.createElement('div');
-        bubble.classList.add('message-bubble');
-        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        bubble.innerHTML = text;
-        if (sender === 'user') {
-            bubble.classList.add('user-message');
-        } else {
-            bubble.classList.add('bot-message');
-            bubble.innerHTML = `✨ ${bubble.innerHTML}`;
-        }
-        chatMessages.appendChild(bubble);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+    function sendToWhatsApp(message) {
+        const encodedMessage = encodeURIComponent(message);
+        window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
     }
 
-    function showTypingIndicator(show) {
-        let indicator = chatMessages.querySelector('.typing-indicator');
-        if (show) {
-            if (!indicator) {
-                indicator = document.createElement('div');
-                indicator.className = 'message-bubble bot-message typing-indicator';
-                indicator.innerHTML = '<span></span><span></span><span></span>';
-                chatMessages.appendChild(indicator);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+    function isProductRelated(text) {
+        const keywords = ['brinco', 'colar', 'anel', 'pulseira', 'joia', 'comprar', 'quero', 'preço', 'festa', 'ocasião', 'vestido', 'presente'];
+        return keywords.some(keyword => text.toLowerCase().includes(keyword));
+    }
+
+    function processBotResponse(botResponse, userMessage) {
+        const currentStep = appState.saleState.currentStep;
+        const userText = userMessage.toLowerCase().trim();
+        
+        console.log('🔍 Processando resposta - Etapa:', currentStep, 'Mensagem:', userText);
+
+        // FASE 1: Detecção de seleção de produto (usuário escolhe por número)
+        if (currentStep === 'consultation' && /^[1-4]$/.test(userText)) {
+            console.log('🔢 Número selecionado detectado');
+            // Encontra produtos mencionados na última resposta da Jade
+            const lastBotMessage = appState.conversationHistory
+                .filter(entry => entry.role === 'assistant')
+                .pop()?.content || '';
+            
+            const products = extractProductsFromMessage(lastBotMessage);
+            const selectedIndex = parseInt(userText) - 1;
+            
+            if (products[selectedIndex]) {
+                updateSaleState('ADD_PRODUCT', products[selectedIndex]);
+                updateSaleState('NEXT_STEP'); // Vai para selection
+                console.log('📦 Produto selecionado:', products[selectedIndex].title);
             }
-        } else {
-            indicator?.remove();
+        }
+        
+        // FASE 2: Detecção de confirmação (sim/não para mais produtos)
+        if (currentStep === 'selection') {
+            if (userText.includes('não') || userText.includes('nao') || userText.includes('n') || userText === '2') {
+                console.log('➡️ Cliente não quer mais produtos - Indo para fechamento');
+                updateSaleState('NEXT_STEP'); // Vai para closing
+            } else if (userText.includes('sim') || userText.includes('s') || userText === '1') {
+                console.log('🔄 Cliente quer mais produtos - Voltando para consulta');
+                appState.saleState.currentStep = 'consultation';
+            }
+        }
+        
+        // FASE 3: Coleta de dados do cliente
+        if (currentStep === 'closing') {
+            if (!appState.saleState.customerData.name && userMessage.length > 3) {
+                updateSaleState('SET_CUSTOMER_DATA', { field: 'name', value: userMessage });
+                console.log('👤 Nome coletado:', userMessage);
+            } else if (!appState.saleState.customerData.address && appState.saleState.customerData.name) {
+                updateSaleState('SET_CUSTOMER_DATA', { field: 'address', value: userMessage });
+                console.log('🏠 Endereço coletado:', userMessage);
+            } else if (!appState.saleState.customerData.payment && appState.saleState.customerData.address) {
+                updateSaleState('SET_CUSTOMER_DATA', { field: 'payment', value: userMessage });
+                console.log('💳 Pagamento coletado:', userMessage);
+                // Quando todos dados coletados, completa venda
+                setTimeout(() => {
+                    updateSaleState('COMPLETE_SALE');
+                    addMessageToUI('bot', 'Perfeito! 🎉 Seu pedido foi enviado para nosso WhatsApp. Em instantes nossa equipe entrará em contato para confirmar tudo! 💖');
+                }, 1500);
+            }
         }
     }
 
-    // Sistema de prompt com histórico
-    function createSystemPrompt(userMessage) {
-    const productsData = extractProductData();
-    
-    // Adiciona a nova mensagem ao histórico
-    conversationHistory.push(`Cliente: ${userMessage}`);
-    
-    // Mantém apenas as últimas 10 mensagens para não exceder limites
-    if (conversationHistory.length > 10) {
-        conversationHistory = conversationHistory.slice(-10);
+    function extractProductsFromMessage(message) {
+        // Extrai produtos mencionados na mensagem da Jade
+        const catalog = extractProductCatalog();
+        const mentionedProducts = [];
+        
+        catalog.todos.forEach(product => {
+            if (message.includes(product.title)) {
+                mentionedProducts.push(product);
+            }
+        });
+        
+        return mentionedProducts.slice(0, 4); // Retorna até 4 produtos mencionados
     }
-    
-    const historyText = conversationHistory.join('\n');
-    
-    // O prompt foi significativamente melhorado aqui!
-   return `Você é **Jade**, uma assistente virtual da loja *Brilho Elegante*, especializada em **moda e semi joias**. 
-Sua personalidade é **amigável, chique, envolvente e fluida** — você conversa como uma vendedora experiente que entende de estilo e sabe continuar o papo naturalmente.
 
----
-📜 **CATÁLOGO DE PRODUTOS DISPONÍVEIS:**
-${productsData}
+    // =============================================
+    // SISTEMA DE CATÁLOGO DINÂMICO
+    // =============================================
+    function extractProductCatalog() {
+        try {
+            const productCards = document.querySelectorAll('#semi-joias .product-card');
+            const catalog = {
+                colares: [],
+                brincos: [],
+                aneis: [],
+                pulseiras: [],
+                berloques: [],
+                conjuntos: [],
+                todos: []
+            };
 
-💬 **HISTÓRICO DE CONVERSA (para manter o contexto):**
-${historyText}
+            productCards.forEach((card, index) => {
+                const title = card.querySelector('.product-title')?.innerText?.trim() || `Produto ${index + 1}`;
+                const price = card.querySelector('.product-price')?.innerText?.trim() || 'Consultar preço';
+                const description = card.querySelector('.product-description')?.innerText?.trim() || 'Produto exclusivo Brilho Elegante';
+                const category = card.getAttribute('data-category') || 'todos';
+                const image = card.querySelector('.product-image img')?.src || '';
+                const badge = card.querySelector('.product-badge')?.innerText || '';
 
----
-🎯 **INSTRUÇÕES PARA JADE – SIGA FIELMENTE:**
+                const product = {
+                    id: `prod_${index + 1}`,
+                    title: title,
+                    price: price,
+                    description: description,
+                    category: category,
+                    image: image,
+                    badge: badge,
+                    keywords: extractKeywords(title + ' ' + description)
+                };
 
-1. **Analise o contexto recente.**
-   - Se o cliente **estiver pedindo detalhes** de um produto (ex: “me fale mais desse colar”, “quanto custa”, “tem de outra cor?”), mantenha o foco **somente nesse produto**.  
-   - Se o cliente **estiver descobrindo** (ex: “tem brincos?”, “quero ver anéis”), continue sugerindo com naturalidade.
+                // Adiciona à categoria específica
+                if (catalog[category]) {
+                    catalog[category].push(product);
+                }
+                
+                // Adiciona à lista geral
+                catalog.todos.push(product);
+            });
 
-2. **Mantenha a fluidez da conversa.**
-   - Sempre **dê continuidade**: evite repetir perguntas que já fez.  
-   - Se o cliente responder algo curto (ex: “sim”, “não”, “ok”), avance com uma fala gentil que leve o diálogo adiante.  
-     Exemplo: “Perfeito 💖! Você prefere peças douradas ou prateadas?”  
-   - Se ele demonstrar interesse, convide-o naturalmente para ver mais detalhes ou falar pelo WhatsApp.
+            console.log(`📦 Catálogo extraído: ${catalog.todos.length} produtos encontrados`);
+            return catalog;
+        } catch (error) {
+            console.error('Erro ao extrair catálogo:', error);
+            return { todos: [] };
+        }
+    }
 
-3. **Evite repetições.**
-   - Nunca repita frases idênticas de mensagens anteriores.
-   - Não pergunte novamente algo que já foi respondido pelo cliente.
-   - Use vocabulário variado, expressivo e humano.
+    function extractKeywords(text) {
+        const commonWords = ['de', 'com', 'para', 'em', 'do', 'da', 'os', 'as', 'um', 'uma'];
+        const words = text.toLowerCase()
+            .replace(/[^\w\s]/g, '')
+            .split(/\s+/)
+            .filter(word => word.length > 2 && !commonWords.includes(word));
+        
+        return [...new Set(words)]; // Remove duplicatas
+    }
 
-4. **Sobre os produtos:**
-   - Fale com entusiasmo, mas **apenas sobre o que existe no catálogo** acima.
-   - Destaque nomes e preços em **negrito**.  
-   - Se não encontrar um produto pedido, diga isso com empatia e ofereça uma alternativa parecida.
+    function findProductsByQuery(query) {
+        const catalog = extractProductCatalog();
+        const queryWords = query.toLowerCase().split(/\s+/);
+        
+        const results = catalog.todos.filter(product => {
+            const searchText = (product.title + ' ' + product.description + ' ' + product.keywords.join(' ')).toLowerCase();
+            return queryWords.some(word => searchText.includes(word));
+        });
 
-5. **Tom de voz e estilo:**
-   - Sempre soe natural, encantadora e elegante.  
-   - Use emojis sutis (💎✨💖) para dar um toque pessoal.  
-   - Evite respostas robóticas ou muito curtas; escreva como se fosse uma conversa real de loja, entre 1 e 3 parágrafos curtos.
+        return results.slice(0, 6); // Retorna no máximo 6 resultados
+    }
 
-6. **Finalização de cada resposta:**
-   - Termine cada mensagem com uma **pergunta leve ou sugestão natural** que incentive o cliente a continuar conversando.  
-     Exemplo: “Quer que eu te mostre algo mais delicado?” ou “Posso te mandar ideias que combinem com esse estilo?”
+    // =============================================
+    // SISTEMA DE PROMPT INTELIGENTE (ATUALIZADO)
+    // =============================================
+    function createSmartPrompt(userMessage) {
+        const catalog = extractProductCatalog();
+        const currentTime = new Date().toLocaleString('pt-BR');
+        
+        // Atualiza histórico
+        appState.conversationHistory.push({
+            role: 'user',
+            content: userMessage,
+            timestamp: currentTime
+        });
 
----
+        // Mantém histórico limitado
+        if (appState.conversationHistory.length > CONFIG.MAX_HISTORY_LENGTH) {
+            appState.conversationHistory = appState.conversationHistory.slice(-CONFIG.MAX_HISTORY_LENGTH);
+        }
 
-Agora gere a próxima mensagem da Jade, **mantendo coerência com o histórico** e seguindo todas as instruções acima.
-Sua resposta:`;
+        // Obtém estado atual da venda
+        const saleInfo = appState.saleState;
 
-}
+        return `Você é **Jade**, consultora especialista em semi joias da **Brilho Elegante**.
 
+🎯 **MISSÃO PRINCIPAL:**
+Converter consultas de clientes em vendas através de um atendimento personalizado.
+
+📦 **CATÁLOGO DISPONÍVEL (USE APENAS ESTES PRODUTOS):**
+${JSON.stringify(catalog.todos.slice(0, 30), null, 2)}
+
+🔄 **ESTADO ATUAL DA VENDA:**
+- Venda em andamento: ${saleInfo.inProgress ? 'Sim' : 'Não'}
+- Etapa atual: ${saleInfo.currentStep}
+- Produtos selecionados: ${saleInfo.selectedProducts.length}
+- Dados coletados: ${Object.values(saleInfo.customerData).filter(val => val).length}/3
+
+📋 **FLUXO OBRIGATÓRIO POR ETAPA:**
+
+${getFlowInstructions(saleInfo.currentStep)}
+
+💎 **DIRETRIZES DE PRODUTOS:**
+${getProductGuidelines()}
+
+🎭 **PERSONALIDADE JADE:**
+- Empática e entusiástica
+- Especialista em styling
+- Tom de conversa entre amigas
+- Usa 1-2 emojis por resposta (💎✨🌟💖)
+- Chama pelo nome quando possível
+
+📝 **FORMATAÇÃO OBRIGATÓRIA:**
+- Produtos: **NOME** - **PREÇO**
+- Destaques em negrito
+- Listas numeradas para opções
+- Frases curtas e diretas
+
+⚠️ **PROIBIÇÕES:**
+- Nunca invente produtos ou preços
+- Não pule etapas do fluxo
+- Não seja genérica ("temos muitas opções")
+- Não pressione compras agressivamente
+
+💡 **EXEMPLOS DE RESPOSTA POR ETAPA:**
+
+CONSULTAÇÃO:
+"Perfeito! 💎 Para um vestido vermelho em festa de gala, recomendo:
+
+1. **Brincos Folhas Delicadas** - **R$ 27,00**
+   Delicados com ponto de luz, ideal para looks sofisticados
+
+2. **Argolas Cravejadas Coloridas** - **R$ 75,60**
+   Douradas com pedras coloridas, perfeitas para fazer statement
+
+Qual desses você gostaria? Escolha pelo número! ✨"
+
+SELEÇÃO:
+"Excelente escolha! 🌟 O **Brincos Folhas Delicadas** é lindo! 
+Gostaria de ver mais opções de brincos ou prefere finalizar a compra?
+1 - Sim, mostrar mais brincos
+2 - Não, finalizar compra"
+
+FECHAMENTO:
+"Maravilha! 💖 Vamos finalizar seu pedido?
+Por favor, me informe:
+1. Seu nome completo"
+
+🔮 **CONTEXTO ATUAL:**
+- Data/hora: ${currentTime}
+- Histórico recente: ${appState.conversationHistory.slice(-3).map(entry => 
+    `${entry.role === 'user' ? 'Cliente' : 'Jade'}: ${entry.content.substring(0, 50)}...`
+).join(' | ')}
+
+**AGORA: Processe esta mensagem seguindo rigorosamente a etapa ${saleInfo.currentStep}:**
+
+"${userMessage}"
+
+Sua resposta (aplicando TODAS as diretrizes da etapa ${saleInfo.currentStep}):`;
+    }
+
+    function getFlowInstructions(step) {
+        const flows = {
+            consultation: `1. ANALISAR necessidade (ocasião, estilo, cores mencionadas)
+2. SELECIONAR 3-4 produtos MAIS RELEVANTES do catálogo
+3. APRESENTAR em lista numerada (1, 2, 3, 4):
+   - **NOME EXATO DO PRODUTO** - **PREÇO EXATO**
+   - Breve descrição (1 linha)
+   - Destaque compatibilidade com a ocasião
+4. FINALIZAR pedindo escolha por número: "Qual você gostaria? Escolha 1, 2, 3 ou 4!"`,
+
+            selection: `1. CONFIRMAR produto escolhido com entusiasmo
+2. PERGUNTAR se quer mais algo: "Gostaria de ver mais opções de [categoria]?"
+3. OFERECER opções claras:
+   - "1 - Sim, mostrar mais [categoria]"
+   - "2 - Não, finalizar compra"
+4. AGUARDAR resposta do cliente`,
+
+            closing: `1. INICIAR fechamento: "Perfeito! Vamos finalizar seu pedido? 💖"
+2. SOLICITAR dados NA ORDEM:
+   - PRIMEIRO: "Por favor, me informe seu nome completo"
+   - SEGUNDO: "Agora seu endereço completo com CEP"
+   - TERCEIRO: "Por último, forma de pagamento preferida (PIX, cartão ou boleto)"
+3. CONFIRMAR cada dado recebido
+4. AO COMPLETAR: enviar para WhatsApp automaticamente`
+        };
+        
+        return flows[step] || flows.consultation;
+    }
+
+    function getProductGuidelines() {
+        return `- Festa de gala → Brincos statement, colares elegantes
+- Vestido vermelho → Dourado, pérolas, diamantes  
+- Dia a dia → Peças delicadas, minimalistas
+- Trabalho → Elegantes mas discretas
+- Noite → Brilho, pedras coloridas
+- Combine cores: vermelho+dourado, preto+prata, branco+prata`;
+    }
+
+    // =============================================
+    // SISTEMA DE FALLBACK INTELIGENTE
+    // =============================================
+    function generateIntelligentFallback(userMessage) {
+        const catalog = extractProductCatalog();
+        const lowerMessage = userMessage.toLowerCase();
+        
+        // Atualiza histórico
+        appState.conversationHistory.push({
+            role: 'user',
+            content: userMessage,
+            timestamp: new Date().toLocaleString('pt-BR')
+        });
+
+        // Detecta intenções
+        const intents = {
+            greeting: /^(oi|olá|ola|hello|hey|start|iniciar)/i.test(userMessage),
+            farewell: /(tchau|bye|até|adeus|sair)/i.test(userMessage),
+            products: /(colar|brinco|anel|pulseira|berloque|joia|semi joia|produto)/i.test(userMessage),
+            price: /(preço|valor|quanto custa|custa|quanto é|barato|caro)/i.test(userMessage),
+            delivery: /(entrega|frete|envio|prazo|demora|chega)/i.test(userMessage),
+            payment: /(pagamento|parcela|cartão|boleto|pix)/i.test(userMessage),
+            help: /(ajuda|sugest|recomend|indica|não sei|indecis|help)/i.test(userMessage),
+            specific: /(ck|pandora|coracao|coração|diamante|ruby|pérola|perola|ouro|prata)/i.test(userMessage)
+        };
+
+        // Respostas para cada intenção
+        if (intents.greeting) {
+            if (!appState.saleState.inProgress && isProductRelated(userMessage)) {
+                updateSaleState('START_SALE');
+            }
+            const greetings = [
+                `Olá! ✨ Sou a ${JADE_PERSONALITY.name}, sua consultora de semi joias da ${JADE_PERSONALITY.store}. É um prazer te atender! Está procurando algo específico hoje?`,
+                `Oi! 💎 Que alegria te ver por aqui! Sou a ${JADE_PERSONALITY.name} e vou te ajudar a encontrar a semi joia perfeita. Tem alguma peça em mente?`,
+                `Olá, bem-vinda(o)! 🌟 Sou a ${JADE_PERSONALITY.name}, especialista em semi joias. Posso te ajudar a explorar nossas coleções incríveis. Por onde gostaria de começar?`
+            ];
+            return greetings[Math.floor(Math.random() * greetings.length)];
+        }
+
+        if (intents.farewell) {
+            const farewells = [
+                "Foi um prazer ajudar você! 💖 Espero te ver em breve na Brilho Elegante. Qualquer dúvida, estarei aqui!",
+                "Obrigada pela visita! ✨ Se precisar de mais alguma coisa, é só chamar. Tenha um dia iluminado!",
+                "Até logo! 💎 Foi maravilhoso conversar com você. Volte sempre à Brilho Elegante!"
+            ];
+            return farewells[Math.floor(Math.random() * farewells.length)];
+        }
+
+        if (intents.products && !appState.saleState.inProgress) {
+            updateSaleState('START_SALE');
+        }
+
+        // Busca inteligente por produtos
+        const searchResults = findProductsByQuery(userMessage);
+        if (searchResults.length > 0 && !appState.saleState.inProgress) {
+            updateSaleState('START_SALE');
+            let response = `**Encontrei estas opções relacionadas para você:**\n\n`;
+            searchResults.slice(0, 3).forEach((product, index) => {
+                response += `${index + 1}. **${product.title}** - ${product.price}\n   ${product.description}\n\n`;
+            });
+            response += `Algum desses produtos te interessou? Escolha pelo número! ✨`;
+            return response;
+        }
+
+        // Resposta padrão engajadora
+        const defaultResponses = [
+            "Interessante! 😊 Para te ajudar melhor, me conta: você está procurando colares, brincos, anéis ou pulseiras hoje?",
+            "Entendi! 💡 Vamos encontrar a peça perfeita para você. Tem alguma preferência de categoria ou estilo?",
+            "Maravilha! ✨ Posso te mostrar nossas coleções por categoria. Tem interesse em colares, brincos, anéis ou pulseiras?",
+            "Perfeito! 😄 Me conta um pouquinho: você gosta mais de peças prateadas, douradas ou com pedras coloridas?"
+        ];
+        
+        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+
+    // =============================================
+    // INTEGRAÇÃO COM API GEMINI
+    // =============================================
     async function getGeminiResponse(userMessage) {
-        const systemPrompt = createSystemPrompt(userMessage);
+        if (!CONFIG.GEMINI_API_KEY) {
+            console.warn('⚠️ Chave da API Gemini não configurada');
+            return generateIntelligentFallback(userMessage);
+        }
+
+        // Se não é relacionado a produtos, usa fallback
+        if (!appState.saleState.inProgress && !isProductRelated(userMessage)) {
+            return generateIntelligentFallback(userMessage);
+        }
+
+        const prompt = createSmartPrompt(userMessage);
         
         const requestBody = {
             contents: [
@@ -2827,7 +3222,7 @@ Sua resposta:`;
                     role: "user",
                     parts: [
                         { 
-                            text: systemPrompt
+                            text: prompt
                         }
                     ]
                 }
@@ -2836,7 +3231,7 @@ Sua resposta:`;
                 temperature: 0.7,
                 topK: 40,
                 topP: 0.95,
-                maxOutputTokens: 1000,
+                maxOutputTokens: 800,
             },
             safetySettings: [
                 {
@@ -2851,7 +3246,7 @@ Sua resposta:`;
         };
 
         try {
-            const response = await fetch(GEMINI_API_URL, {
+            const response = await fetch(`${CONFIG.GEMINI_API_URL}?key=${CONFIG.GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2871,182 +3266,361 @@ Sua resposta:`;
             
             const botResponse = data.candidates[0].content.parts[0].text;
             
-            // Adiciona a resposta ao histórico
-            conversationHistory.push(`Jade: ${botResponse}`);
-            
+            // Adiciona ao histórico
+            appState.conversationHistory.push({
+                role: 'assistant',
+                content: botResponse,
+                timestamp: new Date().toLocaleString('pt-BR')
+            });
+
             return botResponse;
             
         } catch (error) {
-            console.error('Erro na API Gemini:', error);
-            // Fallback local com contexto
-            return generateLocalResponse(userMessage);
+            console.error('❌ Erro na API Gemini:', error);
+            return generateIntelligentFallback(userMessage);
         }
     }
 
-    // Sistema de fallback local melhorado com contexto
-    function generateLocalResponse(userMessage) {
-        const lowerMessage = userMessage.toLowerCase();
+    // =============================================
+    // INTERFACE DO CHAT
+    // =============================================
+    function addMessageToUI(sender, text) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('message-bubble');
         
-        // Adiciona ao histórico
-        conversationHistory.push(`Cliente: ${userMessage}`);
+        // Formata o texto (negrito e quebras de linha)
+        let formattedText = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
         
-        // Análise contextual da conversa
-        const lastUserMessages = conversationHistory.filter(msg => msg.startsWith('Cliente:')).slice(-3);
-        const lastBotMessages = conversationHistory.filter(msg => msg.startsWith('Jade:')).slice(-3);
+        bubble.innerHTML = formattedText;
         
-        // Detecta contexto da conversa
-        const isAskingAboutSpecificProduct = lowerMessage.includes('colar') || lowerMessage.includes('brinco') || 
-                                           lowerMessage.includes('anel') || lowerMessage.includes('pulseira') ||
-                                           lowerMessage.includes('berloque');
-        
-        const isAskingAboutPrice = lowerMessage.includes('preço') || lowerMessage.includes('valor') || 
-                                 lowerMessage.includes('quanto custa') || lowerMessage.includes('custa');
-        
-        const isAskingAboutDelivery = lowerMessage.includes('entrega') || lowerMessage.includes('frete') || 
-                                    lowerMessage.includes('envio') || lowerMessage.includes('prazo');
-        
-        const isGreeting = lowerMessage.includes('ola') || lowerMessage.includes('oi') || 
-                         lowerMessage.includes('olá') || lowerMessage.includes('tudo bem');
-        
-        // Respostas contextuais
-        if (isGreeting) {
-            const response = "Oláa! 😊 Sou a Jade, assistente da Brilho Elegante. Posso ajudar você a encontrar colares, brincos, anéis, pulseiras e muito mais! O que você está procurando?";
-            conversationHistory.push(`Jade: ${response}`);
-            return response;
+        if (sender === 'user') {
+            bubble.classList.add('user-message');
+        } else {
+            bubble.classList.add('bot-message');
+            // Adiciona emoji da Jade no início
+            bubble.innerHTML = `💎 ${bubble.innerHTML}`;
         }
         
-        if (isAskingAboutSpecificProduct) {
-            let category = 'colares';
-            let categoryName = 'colares';
-            
-            if (lowerMessage.includes('brinco')) {
-                category = 'brincos';
-                categoryName = 'brincos';
-            } else if (lowerMessage.includes('anel')) {
-                category = 'aneis';
-                categoryName = 'anéis';
-            } else if (lowerMessage.includes('pulseira')) {
-                category = 'pulseiras';
-                categoryName = 'pulseiras';
-            } else if (lowerMessage.includes('berloque')) {
-                category = 'berloques';
-                categoryName = 'berloques';
+        chatElements.messages.appendChild(bubble);
+        chatElements.messages.scrollTop = chatElements.messages.scrollHeight;
+    }
+
+    function showTypingIndicator(show) {
+        let indicator = chatElements.messages.querySelector('.typing-indicator');
+        
+        if (show) {
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'message-bubble bot-message typing-indicator';
+                indicator.innerHTML = '<span></span><span></span><span></span>';
+                chatElements.messages.appendChild(indicator);
+                chatElements.messages.scrollTop = chatElements.messages.scrollHeight;
             }
-            
-            const products = Array.from(document.querySelectorAll(`#semi-joias .product-card[data-category="${category}"]`)).slice(0, 4);
-            
-            if (products.length > 0) {
-                let response = `**Encontrei estes ${categoryName} para você:**\n\n`;
-                products.forEach((card, index) => {
-                    const title = card.querySelector('.product-title')?.innerText || `Produto ${index + 1}`;
-                    const price = card.querySelector('.product-price')?.innerText.trim() || 'Consultar preço';
-                    response += `${index + 1}. **${title}** - ${price}\n`;
-                });
-                response += `\nGostou de algum desses ${categoryName}? Posso te dar mais detalhes! 😊`;
-                conversationHistory.push(`Jade: ${response}`);
-                return response;
+        } else {
+            if (indicator) {
+                indicator.remove();
             }
         }
-        
-        if (isAskingAboutPrice) {
-            const response = "Os preços das nossas semi joias variam de R$ 27,00 a R$ 249,00, dependendo da peça. Posso te ajudar a encontrar algo dentro do seu orçamento! 💰 Tem alguma preferência de categoria?";
-            conversationHistory.push(`Jade: ${response}`);
-            return response;
-        }
-        
-        if (isAskingAboutDelivery) {
-            const response = "Entregamos para todo Brasil! 🚚 \n\n• **Frete grátis** acima de R$ 150,00\n• **Prazo**: 3-7 dias úteis\n• **Formas de envio**: Correios e transportadoras\n\nPosso te conectar com nosso time pelo WhatsApp para calcular o frete exato! 📱";
-            conversationHistory.push(`Jade: ${response}`);
-            return response;
-        }
-        
-        // Resposta contextual baseada no histórico
-        if (lastUserMessages.some(msg => msg.toLowerCase().includes('colar'))) {
-            const response = "Sobre os colares, temos várias opções! Desde colares delicados até peças statement. Gostaria que eu mostre mais colares específicos? Talvez com pedras, dourados ou prata? 💎";
-            conversationHistory.push(`Jade: ${response}`);
-            return response;
-        }
-        
-        if (lastUserMessages.some(msg => msg.toLowerCase().includes('brinco'))) {
-            const response = "Nossos brincos são lindos! Temos desde argolas clássicas até brincos com pedras coloridas. Posso te mostrar mais opções de brincos? 😊";
-            conversationHistory.push(`Jade: ${response}`);
-            return response;
-        }
-        
-        // Resposta padrão engajadora
-        const defaultResponses = [
-            "Interessante! 😊 Posso te ajudar a encontrar colares, brincos, anéis ou pulseiras? Qual tipo de joia você mais gosta?",
-            "Entendi! 💡 Temos muitas opções lindas. Você está procurando algo específico como colares, brincos ou talvez um conjunto completo?",
-            "Ótimo! ✨ Posso te mostrar nossas coleções por categoria. Tem preferência por colares, brincos, anéis ou pulseiras?",
-            "Maravilha! 😄 Para te ajudar melhor, me conta: você gosta mais de peças delicadas ou ousadas? E tem alguma pedra ou cor preferida?"
-        ];
-        
-        const randomResponse = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-        conversationHistory.push(`Jade: ${randomResponse}`);
-        return randomResponse;
     }
 
     async function handleSendMessage() {
-        if (isProcessing) return;
+        if (appState.isProcessing) return;
         
-        const userText = inputField.value.trim();
+        const userText = chatElements.input.value.trim();
         if (userText === '') return;
-        
+
         // Adiciona mensagem do usuário
         addMessageToUI('user', userText);
-        inputField.value = '';
+        chatElements.input.value = '';
         
-        isProcessing = true;
+        appState.isProcessing = true;
+        appState.lastInteraction = Date.now();
+        
         showTypingIndicator(true);
-        
+
         try {
+            // Inicia venda se for primeira interação relevante
+            if (!appState.saleState.inProgress && isProductRelated(userText)) {
+                updateSaleState('START_SALE');
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
             const botResponse = await getGeminiResponse(userText);
             addMessageToUI('bot', botResponse);
+            
+            // Processa ações baseadas na resposta
+            processBotResponse(botResponse, userText);
+            
         } catch (error) {
-            console.error('Erro ao processar mensagem:', error);
-            const fallbackResponse = "Desculpe, estou com problemas técnicos no momento. 😔 Entre em contato diretamente pelo WhatsApp (14) 99805-3785 para um atendimento personalizado!";
-            addMessageToUI('bot', fallbackResponse);
-            conversationHistory.push(`Jade: ${fallbackResponse}`);
+            console.error('❌ Erro ao processar mensagem:', error);
+            const errorResponse = "Desculpe, estou com uma instabilidade momentânea. 😔 Pode tentar novamente ou entrar em contato diretamente pelo WhatsApp (14) 99805-3785?";
+            addMessageToUI('bot', errorResponse);
         } finally {
             showTypingIndicator(false);
-            isProcessing = false;
+            appState.isProcessing = false;
         }
     }
 
     function initializeChat() {
-        const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Estou aqui para ajudar você a encontrar a semi joia perfeita! Conte-me: você está procurando colares, brincos, anéis ou pulseiras hoje?";
-        addMessageToUI('bot', welcomeMessage);
-        conversationHistory.push(`Jade: ${welcomeMessage}`);
+        const welcomeMessages = [
+            `Olá! ✨ Sou a ${JADE_PERSONALITY.name}, sua consultora pessoal da ${JADE_PERSONALITY.store}. Estou aqui para te ajudar a encontrar as semi joias perfeitas!`,
+            `Que tipo de peça você está procurando hoje? 💎\n\n• Colares elegantes\n• Brincos encantadores\n• Anéis sofisticados\n• Pulseiras delicadas\n• Berloques divertidos`,
+            `Conte-me: é para alguma ocasião especial ou para o dia a dia? Vamos encontrar juntas as peças ideais para você! 💖`
+        ];
+
+        // Mensagem de boas-vindas inicial
+        addMessageToUI('bot', welcomeMessages[0]);
+        
+        // Mensagens subsequentes com delay
+        setTimeout(() => {
+            addMessageToUI('bot', welcomeMessages[1]);
+        }, 1500);
+
+        setTimeout(() => {
+            addMessageToUI('bot', welcomeMessages[2]);
+        }, 3000);
+
+        // Inicializa histórico
+        appState.conversationHistory.push({
+            role: 'assistant',
+            content: welcomeMessages.join(' '),
+            timestamp: new Date().toLocaleString('pt-BR')
+        });
+
+        console.log('🤖 Jade Bot inicializada com sucesso!');
     }
 
-    // --- EVENT LISTENERS ---
-    chatFab.addEventListener('click', () => {
-        chatWidget.classList.toggle('active');
-        if (chatWidget.classList.contains('active') && chatMessages.children.length === 0) {
-            initializeChat();
-        }
-    });
+    // =============================================
+    // EVENT LISTENERS
+    // =============================================
+    function setupEventListeners() {
+        // Botão flutuante do chat
+        chatElements.fab.addEventListener('click', () => {
+            chatElements.widget.classList.toggle('active');
+            if (chatElements.widget.classList.contains('active') && chatElements.messages.children.length === 0) {
+                initializeChat();
+            }
+        });
 
-    closeChatBtn.addEventListener('click', () => {
-        chatWidget.classList.remove('active');
-    });
-    
-    sendBtn.addEventListener('click', handleSendMessage);
-    
-    inputField.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    });
+        // Fechar chat
+        chatElements.closeBtn.addEventListener('click', () => {
+            chatElements.widget.classList.remove('active');
+        });
 
-    // Fechar chat ao clicar fora (para mobile)
-    document.addEventListener('click', (e) => {
-        if (!chatWidget.contains(e.target) && !chatFab.contains(e.target) && chatWidget.classList.contains('active')) {
-            chatWidget.classList.remove('active');
+        // Enviar mensagem
+        chatElements.sendBtn.addEventListener('click', handleSendMessage);
+        
+        // Enter para enviar
+        chatElements.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+
+        // Fechar chat ao clicar fora (para mobile)
+        document.addEventListener('click', (e) => {
+            if (!chatElements.widget.contains(e.target) && 
+                !chatElements.fab.contains(e.target) && 
+                chatElements.widget.classList.contains('active')) {
+                chatElements.widget.classList.remove('active');
+            }
+        });
+
+        // Focar no input quando o chat abrir
+        chatElements.widget.addEventListener('transitionend', () => {
+            if (chatElements.widget.classList.contains('active')) {
+                chatElements.input.focus();
+            }
+        });
+
+        console.log('🎯 Event listeners configurados');
+    }
+
+    // =============================================
+    // INICIALIZAÇÃO
+    // =============================================
+    function initializeJadeBot() {
+        console.log('🚀 Iniciando Jade Bot...');
+        
+        // Configura eventos
+        setupEventListeners();
+        
+        // Extrai catálogo inicial
+        const initialCatalog = extractProductCatalog();
+        console.log(`📦 Catálogo inicial: ${initialCatalog.todos.length} produtos carregados`);
+        
+        // Configura WhatsApp
+        configureWhatsAppLinks();
+        
+        console.log('✅ Jade Bot totalmente inicializada e pronta!');
+    }
+
+    function configureWhatsAppLinks() {
+        const defaultMessage = "Olá! Gostaria de mais informações sobre os produtos da Brilho Elegante.";
+        
+        document.querySelectorAll('.btn-whatsapp').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productCard = this.closest('.product-card');
+                let message = defaultMessage;
+
+                if (productCard) {
+                    const productName = productCard.querySelector('.product-title')?.textContent.trim() || 'produto';
+                    const productPrice = productCard.querySelector('.product-price')?.textContent.trim() || '';
+                    
+                    message = `Olá! Gostaria de comprar este produto do Brilho Elegante:\n\n*Produto:* ${productName}\n*Preço:* ${productPrice}\n\nPoderia me ajudar?`;
+                }
+
+                const encodedMessage = encodeURIComponent(message);
+                window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+            });
+        });
+    }
+
+    // =============================================
+    // NAVEGAÇÃO E FILTROS EXISTENTES
+    // =============================================
+    const hamburger = document.querySelector('.hamburger');
+    const menu = document.querySelector('.menu');
+    const navLinks = document.querySelectorAll('nav a[data-page], footer a[data-page], .btn[data-page]');
+    const menuLinks = document.querySelectorAll('.menu a');
+    
+    function closeMobileMenu() {
+        hamburger.classList.remove('active');
+        menu.classList.remove('active');
+    }
+    
+    if (hamburger) {
+        hamburger.addEventListener('click', function() {
+            this.classList.toggle('active');
+            menu.classList.toggle('active');
+        });
+    }
+    
+    if (navLinks.length > 0) {
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeMobileMenu();
+                const pageId = this.getAttribute('data-page');
+                showPage(pageId);
+            });
+        });
+    }
+    
+    function showPage(pageId) {
+        document.body.setAttribute('data-page', pageId);
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        const targetPage = document.getElementById(pageId);
+        if(targetPage) {
+            targetPage.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    });
+        if (menuLinks.length > 0) {
+            menuLinks.forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('data-page') === pageId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    }
+
+    // Filtros de produtos
+    const semiJoiasFilters = document.querySelectorAll('#semi-joias .category-btn');
+    const semiJoiasProducts = document.querySelectorAll('#semi-joias .product-card');
+    
+    if(semiJoiasFilters.length > 0) {
+        semiJoiasFilters.forEach(btn => {
+            btn.addEventListener('click', function() {
+                semiJoiasFilters.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.getAttribute('data-category');
+                semiJoiasProducts.forEach(product => {
+                    product.style.display = (filter === 'todos' || product.getAttribute('data-category') === filter) ? 'block' : 'none';
+                });
+            });
+        });
+    }
+
+    // =============================================
+    // INICIALIZAÇÃO FINAL
+    // =============================================
+    initializeJadeBot();
+
+    // Exporta para uso global (se necessário)
+    window.JadeBot = {
+        config: CONFIG,
+        state: appState,
+        extractCatalog: extractProductCatalog,
+        sendMessage: handleSendMessage
+    };
 });
+
+// =============================================
+// ESTILOS DINÂMICOS PARA O CHAT
+// =============================================
+const dynamicStyles = `
+.chat-widget-enhanced .message-bubble {
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #999;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { 
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.message-bubble strong {
+    color: var(--semi-joias-destaque);
+    font-weight: 600;
+}
+`;
+
+// Adiciona estilos dinâmicos
+if (document.head) {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = dynamicStyles;
+    document.head.appendChild(styleSheet);
+}
 </script>
     </body>
 </html>
