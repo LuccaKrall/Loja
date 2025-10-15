@@ -2696,8 +2696,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÃO ---
     const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4';
-    
-    // URL corrigida com modelo atual
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${API_KEY}`;
 
     // --- ELEMENTOS DO DOM ---
@@ -2709,6 +2707,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.getElementById('send-chat-btn');
 
     let isProcessing = false;
+    let conversationHistory = [];
     
     // --- FUNÇÕES ---
 
@@ -2755,26 +2754,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Sistema de prompt otimizado
+    // Sistema de prompt com histórico
     function createSystemPrompt(userMessage) {
         const productsData = extractProductData();
         
-        return `Você é a Jade, assistente virtual da loja de semi joias "Brilho Elegante".
+        // Adiciona a nova mensagem ao histórico
+        conversationHistory.push(`Cliente: ${userMessage}`);
+        
+        // Mantém apenas as últimas 10 mensagens para não exceder limites
+        if (conversationHistory.length > 10) {
+            conversationHistory = conversationHistory.slice(-10);
+        }
+        
+        const historyText = conversationHistory.join('\n');
+        
+        return `Você é a Jade, assistente virtual especializada em semi joias da loja "Brilho Elegante".
 
 CATÁLOGO DE PRODUTOS DISPONÍVEIS:
 ${productsData}
 
+HISTÓRICO DA CONVERSA (mantenha o contexto):
+${historyText}
+
 REGRAS IMPORTANTES:
 1. Baseie-se APENAS nos produtos listados acima
 2. NUNCA invente produtos que não estejam na lista
-3. Seja simpática, prestativa e informal
+3. Seja simpática, prestativa e mantenha o contexto da conversa
 4. Formate respostas claras, usando **negrito** para nomes e preços
 5. Valor máximo dos produtos: R$ 300,00
-6. Se não souber responder sobre algo fora do catálogo, diga gentilmente
+6. Faça perguntas de acompanhamento para entender melhor as necessidades do cliente
 
-Pergunta do usuário: "${userMessage}"
-
-Sua resposta (seja útil e amigável):`;
+Sua resposta (como Jade, mantendo a personalidade amigável e o contexto da conversa):`;
     }
 
     async function getGeminiResponse(userMessage) {
@@ -2795,7 +2805,7 @@ Sua resposta (seja útil e amigável):`;
                 temperature: 0.7,
                 topK: 40,
                 topP: 0.95,
-                maxOutputTokens: 800,
+                maxOutputTokens: 1000,
             },
             safetySettings: [
                 {
@@ -2819,10 +2829,6 @@ Sua resposta (seja útil e amigável):`;
             });
 
             if (!response.ok) {
-                // Se ainda der erro, vamos tentar uma URL alternativa
-                if (response.status === 404) {
-                    throw new Error('Modelo não encontrado. Tentando abordagem alternativa...');
-                }
                 throw new Error(`Erro HTTP: ${response.status}`);
             }
 
@@ -2832,64 +2838,121 @@ Sua resposta (seja útil e amigável):`;
                 throw new Error('Resposta da API inválida');
             }
             
-            return data.candidates[0].content.parts[0].text;
+            const botResponse = data.candidates[0].content.parts[0].text;
+            
+            // Adiciona a resposta ao histórico
+            conversationHistory.push(`Jade: ${botResponse}`);
+            
+            return botResponse;
             
         } catch (error) {
             console.error('Erro na API Gemini:', error);
-            // Fallback: resposta local baseada nos produtos
+            // Fallback local com contexto
             return generateLocalResponse(userMessage);
         }
     }
 
-    // Sistema de fallback local
+    // Sistema de fallback local melhorado com contexto
     function generateLocalResponse(userMessage) {
         const lowerMessage = userMessage.toLowerCase();
-        const productsData = extractProductData();
         
-        // Análise simples da mensagem do usuário
-        if (lowerMessage.includes('ola') || lowerMessage.includes('oi') || lowerMessage.includes('olá')) {
-            return "Olá! 😊 Sou a Jade, assistente da Brilho Elegante. Posso ajudar você a encontrar colares, brincos, anéis, pulseiras e muito mais! O que você está procurando?";
-        }
+        // Adiciona ao histórico
+        conversationHistory.push(`Cliente: ${userMessage}`);
         
-        if (lowerMessage.includes('colar') || lowerMessage.includes('colares')) {
-            const colares = Array.from(document.querySelectorAll('#semi-joias .product-card[data-category="colares"]')).slice(0, 3);
-            let response = "**Encontrei estes colares para você:**\n\n";
-            colares.forEach((card, index) => {
-                const title = card.querySelector('.product-title')?.innerText || 'Colar';
-                const price = card.querySelector('.product-price')?.innerText.trim() || 'Consultar preço';
-                response += `${index + 1}. **${title}** - ${price}\n`;
-            });
-            response += "\nPosso mostrar mais colares se quiser!";
+        // Análise contextual da conversa
+        const lastUserMessages = conversationHistory.filter(msg => msg.startsWith('Cliente:')).slice(-3);
+        const lastBotMessages = conversationHistory.filter(msg => msg.startsWith('Jade:')).slice(-3);
+        
+        // Detecta contexto da conversa
+        const isAskingAboutSpecificProduct = lowerMessage.includes('colar') || lowerMessage.includes('brinco') || 
+                                           lowerMessage.includes('anel') || lowerMessage.includes('pulseira') ||
+                                           lowerMessage.includes('berloque');
+        
+        const isAskingAboutPrice = lowerMessage.includes('preço') || lowerMessage.includes('valor') || 
+                                 lowerMessage.includes('quanto custa') || lowerMessage.includes('custa');
+        
+        const isAskingAboutDelivery = lowerMessage.includes('entrega') || lowerMessage.includes('frete') || 
+                                    lowerMessage.includes('envio') || lowerMessage.includes('prazo');
+        
+        const isGreeting = lowerMessage.includes('ola') || lowerMessage.includes('oi') || 
+                         lowerMessage.includes('olá') || lowerMessage.includes('tudo bem');
+        
+        // Respostas contextuais
+        if (isGreeting) {
+            const response = "Oláa! 😊 Sou a Jade, assistente da Brilho Elegante. Posso ajudar você a encontrar colares, brincos, anéis, pulseiras e muito mais! O que você está procurando?";
+            conversationHistory.push(`Jade: ${response}`);
             return response;
         }
         
-        if (lowerMessage.includes('brinco') || lowerMessage.includes('brincos')) {
-            const brincos = Array.from(document.querySelectorAll('#semi-joias .product-card[data-category="brincos"]')).slice(0, 3);
-            let response = "**Aqui estão alguns brincos lindos:**\n\n";
-            brincos.forEach((card, index) => {
-                const title = card.querySelector('.product-title')?.innerText || 'Brinco';
-                const price = card.querySelector('.product-price')?.innerText.trim() || 'Consultar preço';
-                response += `${index + 1}. **${title}** - ${price}\n`;
-            });
+        if (isAskingAboutSpecificProduct) {
+            let category = 'colares';
+            let categoryName = 'colares';
+            
+            if (lowerMessage.includes('brinco')) {
+                category = 'brincos';
+                categoryName = 'brincos';
+            } else if (lowerMessage.includes('anel')) {
+                category = 'aneis';
+                categoryName = 'anéis';
+            } else if (lowerMessage.includes('pulseira')) {
+                category = 'pulseiras';
+                categoryName = 'pulseiras';
+            } else if (lowerMessage.includes('berloque')) {
+                category = 'berloques';
+                categoryName = 'berloques';
+            }
+            
+            const products = Array.from(document.querySelectorAll(`#semi-joias .product-card[data-category="${category}"]`)).slice(0, 4);
+            
+            if (products.length > 0) {
+                let response = `**Encontrei estes ${categoryName} para você:**\n\n`;
+                products.forEach((card, index) => {
+                    const title = card.querySelector('.product-title')?.innerText || `Produto ${index + 1}`;
+                    const price = card.querySelector('.product-price')?.innerText.trim() || 'Consultar preço';
+                    response += `${index + 1}. **${title}** - ${price}\n`;
+                });
+                response += `\nGostou de algum desses ${categoryName}? Posso te dar mais detalhes! 😊`;
+                conversationHistory.push(`Jade: ${response}`);
+                return response;
+            }
+        }
+        
+        if (isAskingAboutPrice) {
+            const response = "Os preços das nossas semi joias variam de R$ 27,00 a R$ 249,00, dependendo da peça. Posso te ajudar a encontrar algo dentro do seu orçamento! 💰 Tem alguma preferência de categoria?";
+            conversationHistory.push(`Jade: ${response}`);
             return response;
         }
         
-        if (lowerMessage.includes('preço') || lowerMessage.includes('valor') || lowerMessage.includes('quanto custa')) {
-            return "Os preços das nossas semi joias variam de R$ 27,00 a R$ 249,00, dependendo da peça. Posso te ajudar a encontrar algo dentro do seu orçamento! 💰";
+        if (isAskingAboutDelivery) {
+            const response = "Entregamos para todo Brasil! 🚚 \n\n• **Frete grátis** acima de R$ 150,00\n• **Prazo**: 3-7 dias úteis\n• **Formas de envio**: Correios e transportadoras\n\nPosso te conectar com nosso time pelo WhatsApp para calcular o frete exato! 📱";
+            conversationHistory.push(`Jade: ${response}`);
+            return response;
         }
         
-        if (lowerMessage.includes('entrega') || lowerMessage.includes('frete') || lowerMessage.includes('envio')) {
-            return "Entregamos para todo Brasil! 🚚 O prazo e valor do frete variam por região. Entre em contato pelo WhatsApp (14) 99805-3785 para calcular o frete exato!";
+        // Resposta contextual baseada no histórico
+        if (lastUserMessages.some(msg => msg.toLowerCase().includes('colar'))) {
+            const response = "Sobre os colares, temos várias opções! Desde colares delicados até peças statement. Gostaria que eu mostre mais colares específicos? Talvez com pedras, dourados ou prata? 💎";
+            conversationHistory.push(`Jade: ${response}`);
+            return response;
         }
         
-        // Resposta padrão
-        return `Desculpe, estou com limitações técnicas no momento. 😔 
-
-Para um atendimento personalizado, entre em contato diretamente:
-📱 **WhatsApp:** (14) 99805-3785
-📸 **Instagram:** @brilho_elegante1
-
-Posso te ajudar com informações sobre **colares, brincos, anéis, pulseiras** ou **berloques**! O que você gostaria de ver?`;
+        if (lastUserMessages.some(msg => msg.toLowerCase().includes('brinco'))) {
+            const response = "Nossos brincos são lindos! Temos desde argolas clássicas até brincos com pedras coloridas. Posso te mostrar mais opções de brincos? 😊";
+            conversationHistory.push(`Jade: ${response}`);
+            return response;
+        }
+        
+        // Resposta padrão engajadora
+        const defaultResponses = [
+            "Interessante! 😊 Posso te ajudar a encontrar colares, brincos, anéis ou pulseiras? Qual tipo de joia você mais gosta?",
+            "Entendi! 💡 Temos muitas opções lindas. Você está procurando algo específico como colares, brincos ou talvez um conjunto completo?",
+            "Ótimo! ✨ Posso te mostrar nossas coleções por categoria. Tem preferência por colares, brincos, anéis ou pulseiras?",
+            "Maravilha! 😄 Para te ajudar melhor, me conta: você gosta mais de peças delicadas ou ousadas? E tem alguma pedra ou cor preferida?"
+        ];
+        
+        const randomResponse = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        conversationHistory.push(`Jade: ${randomResponse}`);
+        return randomResponse;
     }
 
     async function handleSendMessage() {
@@ -2910,8 +2973,9 @@ Posso te ajudar com informações sobre **colares, brincos, anéis, pulseiras** 
             addMessageToUI('bot', botResponse);
         } catch (error) {
             console.error('Erro ao processar mensagem:', error);
-            const fallbackResponse = "Desculpe, estou com problemas técnicos. 😔 Entre em contato pelo WhatsApp (14) 99805-3785 para um atendimento personalizado!";
+            const fallbackResponse = "Desculpe, estou com problemas técnicos no momento. 😔 Entre em contato diretamente pelo WhatsApp (14) 99805-3785 para um atendimento personalizado!";
             addMessageToUI('bot', fallbackResponse);
+            conversationHistory.push(`Jade: ${fallbackResponse}`);
         } finally {
             showTypingIndicator(false);
             isProcessing = false;
@@ -2919,8 +2983,9 @@ Posso te ajudar com informações sobre **colares, brincos, anéis, pulseiras** 
     }
 
     function initializeChat() {
-        const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Estou aqui para ajudar você a encontrar a semi joia perfeita! Como posso te ajudar hoje?";
+        const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Estou aqui para ajudar você a encontrar a semi joia perfeita! Conte-me: você está procurando colares, brincos, anéis ou pulseiras hoje?";
         addMessageToUI('bot', welcomeMessage);
+        conversationHistory.push(`Jade: ${welcomeMessage}`);
     }
 
     // --- EVENT LISTENERS ---
@@ -2931,7 +2996,9 @@ Posso te ajudar com informações sobre **colares, brincos, anéis, pulseiras** 
         }
     });
 
-    closeChatBtn.addEventListener('click', () => chatWidget.classList.remove('active'));
+    closeChatBtn.addEventListener('click', () => {
+        chatWidget.classList.remove('active');
+    });
     
     sendBtn.addEventListener('click', handleSendMessage);
     
