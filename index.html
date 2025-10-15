@@ -2695,9 +2695,9 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- CONFIGURAÇÃO ---
-        // ⚠️ COLE SUA CHAVE DE API AQUI ⚠️
-        const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4'; // Substitua pelo seu valor real
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+        const API_KEY = 'AIzaSyB4Q8nOQ3R2sDh8BwFh1LzRdrdkGfzy_y4'; // Lembre-se de colocar sua chave real
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
+
         // --- ELEMENTOS DO DOM ---
         const chatFab = document.getElementById('chat-fab');
         const chatWidget = document.getElementById('chat-widget');
@@ -2707,11 +2707,9 @@
         const sendBtn = document.getElementById('send-chat-btn');
 
         let conversationHistory = [];
-        let productsData = ''; // Irá armazenar os dados dos produtos
-
+        
         // --- FUNÇÕES ---
 
-        // 1. Extrai dados dos produtos da página para "alimentar" a IA
         function extractProductData() {
             const productCards = document.querySelectorAll('#semi-joias .product-card');
             let productList = [];
@@ -2724,28 +2722,21 @@
             return productList.join('\n');
         }
 
-        // 2. Adiciona uma mensagem na interface do chat
         function addMessageToUI(sender, text) {
             const bubble = document.createElement('div');
             bubble.classList.add('message-bubble');
-            
-            // Converte markdown básico (negrito) para HTML
             text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            bubble.innerHTML = text; // Usa innerHTML para renderizar o <strong>
-
+            bubble.innerHTML = text;
             if (sender === 'user') {
                 bubble.classList.add('user-message');
             } else {
                 bubble.classList.add('bot-message');
                 bubble.innerHTML = `✨ ${bubble.innerHTML}`;
             }
-            
             chatMessages.appendChild(bubble);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // 3. Mostra/esconde o indicador de "digitando..."
         function showTypingIndicator(show) {
             let indicator = chatMessages.querySelector('.typing-indicator');
             if (show) {
@@ -2760,45 +2751,50 @@
                 indicator?.remove();
             }
         }
+        
+        // CORREÇÃO: Função para iniciar o chat e definir o histórico inicial
+        function initializeChat() {
+            const productsData = extractProductData();
+            const welcomeMessage = "Olá! ✨ Sou a Jadis, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
+            
+            // A instrução do sistema agora é a primeira mensagem do histórico
+            conversationHistory = [
+                {
+                    "role": "user",
+                    "parts": [{ "text": `Você é uma assistente virtual especialista em semi joias para a loja "Brilho Elegante". Seu nome é Jade. Seja extremamente simpática, prestativa e um pouco informal. Seu objetivo é ajudar as clientes a encontrar a joia perfeita. **NUNCA** invente produtos. Baseie TODAS as suas recomendações EXCLUSIVAMENTE na lista de produtos fornecida abaixo. Se o usuário perguntar algo não relacionado a joias, gentilmente volte o foco para o catálogo. Formate suas respostas de forma clara, usando negrito para destacar nomes de produtos e preços.\n\n**LISTA DE PRODUTOS DISPONÍVEIS:**\n${productsData}` }]
+                },
+                {
+                    "role": "model",
+                    "parts": [{ "text": welcomeMessage }]
+                }
+            ];
+            
+            // Adiciona apenas a mensagem de boas-vindas do bot na tela
+            addMessageToUI('bot', welcomeMessage);
+        }
 
-        // 4. Envia a mensagem do usuário para a API do Gemini
         async function getGeminiResponse() {
             showTypingIndicator(true);
-
-            // CORREÇÃO 3: Removido 'role: "system"'
-            const systemInstruction = {
-                parts: [{
-                    text: `Você é uma assistente virtual especialista em semi joias para a loja "Brilho Elegante". Seu nome é Jade. Seja extremamente simpática, prestativa e um pouco informal.
-                    Seu objetivo é ajudar as clientes a encontrar a joia perfeita.
-                    **NUNCA** invente produtos. Baseie TODAS as suas recomendações EXCLUSIVAMENTE na lista de produtos fornecida abaixo.
-                    Se o usuário perguntar algo não relacionado a joias, gentilmente volte o foco para o catálogo.
-                    Formate suas respostas de forma clara, usando negrito para destacar nomes de produtos e preços.
-                    
-                    **LISTA DE PRODUTOS DISPONÍVEIS:**
-                    ${productsData}`
-                }]
-            };
-
+            
+            // Mapeia o histórico para o formato da API
             const historyForApi = conversationHistory.map(msg => ({
                 role: msg.role,
                 parts: [{ text: msg.parts[0].text }]
             }));
 
             try {
-                // CORREÇÃO 1: Usando a variável correta GEMINI_API_URL
                 const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    // CORREÇÃO: Envia apenas o 'contents', sem 'system_instruction'
                     body: JSON.stringify({
-                        contents: [...historyForApi],
-                        // CORREÇÃO 2: Usando 'system_instruction' com underscore
-                        system_instruction: systemInstruction,
+                        contents: historyForApi
                     })
                 });
 
                 if (!response.ok) {
                     const errorBody = await response.text();
-                    throw new Error(`Erro na API: ${response.status} ${response.statusText} - ${errorBody}`);
+                    throw new Error(`Erro na API: ${response.status}  - ${errorBody}`);
                 }
 
                 const data = await response.json();
@@ -2819,15 +2815,12 @@
             }
         }
 
-        // 5. Função principal para lidar com o envio de mensagem
         function handleSendMessage() {
             const userText = inputField.value.trim();
             if (userText === '') return;
-
             addMessageToUI('user', userText);
             conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
             inputField.value = '';
-
             getGeminiResponse();
         }
         
@@ -2835,10 +2828,7 @@
         chatFab.addEventListener('click', () => {
             chatWidget.classList.toggle('active');
             if (chatWidget.classList.contains('active') && chatMessages.children.length === 0) {
-                productsData = extractProductData();
-                const welcomeMessage = "Olá! ✨ Sou a Jade, sua assistente virtual da Brilho Elegante. Como posso te ajudar a encontrar a semi joia perfeita hoje?";
-                addMessageToUI('bot', welcomeMessage);
-                // Não adicionamos a mensagem de boas-vindas ao histórico para não confundir a IA
+                initializeChat();
             }
         });
 
